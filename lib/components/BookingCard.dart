@@ -207,31 +207,60 @@ class BookingCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.cancel, size: 16),
-                  label: const Text(
-                    'Cancel',
-                    style: TextStyle(fontSize: 13, fontFamily: 'Tajawal'),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        booking.status == 'pending' ||
-                            booking.status == 'confirmed'
-                        ? Colors.red
-                        : Colors.grey,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 8,
-                    ),
-                    minimumSize: const Size(0, 0),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
+                booking.rated == false &&
+                        (booking.status == 'confirmed' ||
+                            booking.status == 'pending' ||
+                            booking.status == 'active')
+                    ? ElevatedButton.icon(
+                        onPressed: () {},
+                        icon: const Icon(Icons.cancel, size: 16),
+                        label: const Text(
+                          'Cancel',
+                          style: TextStyle(fontSize: 13, fontFamily: 'Tajawal'),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              booking.status == 'pending' ||
+                                  booking.status == 'confirmed'
+                              ? Colors.red
+                              : Colors.grey,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 8,
+                          ),
+                          minimumSize: const Size(0, 0),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      )
+                    : ElevatedButton.icon(
+                        onPressed: () {},
+                        icon: const Icon(Icons.cancel, size: 16),
+                        label: const Text(
+                          'Cancel',
+                          style: TextStyle(fontSize: 13, fontFamily: 'Tajawal'),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              booking.status == 'pending' ||
+                                  booking.status == 'confirmed'
+                              ? Colors.red
+                              : Colors.grey,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 8,
+                          ),
+                          minimumSize: const Size(0, 0),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
               ],
             ),
           ],

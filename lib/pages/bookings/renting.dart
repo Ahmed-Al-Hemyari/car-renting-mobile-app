@@ -5,6 +5,7 @@ import 'package:car_renting/services/Car.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class Renting extends StatefulWidget {
+  // final Car car;
   const Renting({super.key});
 
   @override

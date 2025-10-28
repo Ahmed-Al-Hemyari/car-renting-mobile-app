@@ -1,10 +1,9 @@
 import 'package:car_renting/services/Booking.dart';
 import 'package:car_renting/services/Car.dart';
-import 'package:car_renting/services/Period.dart';
 import 'package:car_renting/services/User.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
-import 'dart:convert';
+// import 'package:http/http.dart';
+// import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
@@ -19,26 +18,27 @@ class Loading extends StatefulWidget {
 }
 
 class _LoadingState extends State<Loading> {
-  Future<List<dynamic>> getCars() async {
-    // Read the saved token
-    final token = await storage.read(key: 'token');
+  // Future<List<dynamic>> getCars() async {
+  //   // Read the saved token
+  //   final token = await storage.read(key: 'token');
 
-    // Make sure to use `http.get`, not just `get`
-    final res = await get(
-      Uri.parse('$baseUrl/cars'),
-      headers: {
-        'Accept': 'application/json', // Laravel expects this
-        'Authorization': 'Bearer $token', // Sanctum auth
-      },
-    );
+  //   final res = await get(
+  //     Uri.parse('$baseUrl/cars'),
+  //     headers: {
+  //       'Accept': 'application/json', // Laravel expects this
+  //       'Authorization': 'Bearer $token', // Sanctum auth
+  //     },
+  //   );
 
-    // Handle response status
-    if (res.statusCode == 200) {
-      return jsonDecode(res.body); // returns a list of posts
-    } else {
-      throw Exception('Failed to load cars: ${res.statusCode}');
-    }
-  }
+  //   // Handle response status
+  //   if (res.statusCode == 200) {
+  //     return jsonDecode(res.body); // returns a list of posts
+  //   } else {
+  //     throw Exception('Failed to load cars: ${res.statusCode}');
+  //   }
+  // }
+
+  // Loading Pages
 
   Future<void> _loadHomePage() async {
     Navigator.pushReplacementNamed(
@@ -56,6 +56,20 @@ class _LoadingState extends State<Loading> {
         context,
         '/cars',
         arguments: {'cars': cars, 'selectedIndex': 1},
+      );
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+  Future<void> _loadCarShowPage() async {
+    try {
+      // final data = await getCars();
+      // final cars = <String, Car>{'car1': car1, 'car2': car2};
+      Navigator.pushReplacementNamed(
+        context,
+        '/car-show',
+        arguments: {'car': car1, 'selectedIndex': 1},
       );
     } catch (e) {
       print('Error: $e');
@@ -102,6 +116,8 @@ class _LoadingState extends State<Loading> {
           break;
         case '/cars':
           _loadCarsPage();
+        case '/car-show':
+          _loadCarShowPage();
           break;
         case '/renting':
           _loadRentingPage();
@@ -133,9 +149,9 @@ final car1 = Car(
   price: 100,
   rate: 4.5,
   unavailableDates: [
-    Period(startDate: DateTime(2025, 9, 25), endDate: DateTime(2025, 10, 2)),
-    Period(startDate: DateTime(2025, 10, 5), endDate: DateTime(2025, 10, 10)),
-    Period(startDate: DateTime(2025, 10, 15), endDate: DateTime(2025, 10, 20)),
+    // Period(startDate: DateTime(2025, 9, 25), endDate: DateTime(2025, 10, 2)),
+    // Period(startDate: DateTime(2025, 10, 5), endDate: DateTime(2025, 10, 10)),
+    // Period(startDate: DateTime(2025, 10, 15), endDate: DateTime(2025, 10, 20)),
   ],
 );
 final car2 = Car(
@@ -146,9 +162,9 @@ final car2 = Car(
   price: 150,
   rate: 4.6,
   unavailableDates: [
-    Period(startDate: DateTime(2025, 9, 25), endDate: DateTime(2025, 9, 2)),
-    Period(startDate: DateTime(2025, 10, 5), endDate: DateTime(2025, 10, 10)),
-    Period(startDate: DateTime(2025, 10, 15), endDate: DateTime(2025, 10, 20)),
+    // Period(startDate: DateTime(2025, 9, 25), endDate: DateTime(2025, 9, 2)),
+    // Period(startDate: DateTime(2025, 10, 5), endDate: DateTime(2025, 10, 10)),
+    // Period(startDate: DateTime(2025, 10, 15), endDate: DateTime(2025, 10, 20)),
   ],
 );
 
@@ -162,6 +178,7 @@ final booking1 = Booking(
   startDate: DateTime(2025, 10, 20),
   endDate: DateTime(2025, 10, 25),
   status: 'pending',
+  rated: false,
 );
 final booking2 = Booking(
   id: 1,
@@ -171,4 +188,5 @@ final booking2 = Booking(
   startDate: DateTime(2025, 10, 21),
   endDate: DateTime(2025, 10, 23),
   status: 'completed',
+  rated: false,
 );

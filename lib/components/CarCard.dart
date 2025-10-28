@@ -18,27 +18,36 @@ class CarCard extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          if (car.image != '' && car.image!.isNotEmpty && car.image != null)
-            (car.image!.toLowerCase().endsWith('.svg')
-                ? SvgPicture.asset(
-                    'assets/images/${car.image}',
-                    width: double.infinity,
-                    height: 100,
-                    fit: BoxFit.cover,
-                  )
-                : Image.asset(
-                    'assets/images/${car.image}',
-                    width: double.infinity,
-                    height: 100,
-                    fit: BoxFit.cover,
-                  ))
-          else
-            SvgPicture.asset(
-              'assets/images/no-image-car.svg',
-              width: double.infinity,
-              height: 100,
-              fit: BoxFit.cover,
-            ),
+          (car.image != null && car.image!.isNotEmpty)
+              ? (car.image!.toLowerCase().endsWith('.svg')
+                    ? SvgPicture.network(
+                        car.image!,
+                        width: double.infinity,
+                        height: 100,
+                        fit: BoxFit.cover,
+                        placeholderBuilder: (context) =>
+                            const Center(child: CircularProgressIndicator()),
+                      )
+                    : Image.network(
+                        car.image!,
+                        width: double.infinity,
+                        height: 100,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return SvgPicture.asset(
+                            'assets/images/no-image-car.svg',
+                            width: double.infinity,
+                            height: 100,
+                            fit: BoxFit.cover,
+                          );
+                        },
+                      ))
+              : SvgPicture.asset(
+                  'assets/images/no-image-car.svg',
+                  width: double.infinity,
+                  height: 100,
+                  fit: BoxFit.cover,
+                ),
 
           Text(
             '${car.brand} ${car.name}',
@@ -112,10 +121,10 @@ class CarCard extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
-                Navigator.pushReplacementNamed(
+                Navigator.pushNamed(
                   context,
                   '/',
-                  arguments: {'car': car, 'wantedRoute': '/renting'},
+                  arguments: {'car': car, 'wantedRoute': '/car-show'},
                 );
               },
               style: ButtonStyle(
@@ -123,9 +132,7 @@ class CarCard extends StatelessWidget {
                 foregroundColor: WidgetStateProperty.all(Colors.white),
                 shape: WidgetStateProperty.all(
                   RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                      12,
-                    ), // <-- border radius
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
               ),

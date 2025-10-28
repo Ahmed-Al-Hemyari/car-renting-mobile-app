@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 // import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:car_renting/components/CarCard.dart';
 import 'package:flutter_layout_grid/flutter_layout_grid.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class Cars extends StatefulWidget {
   const Cars({super.key});
@@ -15,6 +17,22 @@ class Cars extends StatefulWidget {
 
 class _CarsState extends State<Cars> {
   int _selectedIndex = 0;
+
+  final String url = "http://10.0.2.2:8000/api/cars";
+
+  Future<List<Car>> getCars() async {
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      final body = json.decode(response.body);
+      final List<dynamic> carList = body['data'];
+
+      return carList.map((json) => Car.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load cars');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -70,62 +88,40 @@ class _CarsState extends State<Cars> {
     // Navigation bar function
 
     // imported data
-    final arguments = ModalRoute.of(context)?.settings.arguments as Map? ?? {};
-    final carsMap = arguments['cars'] as Map<String, Car>? ?? {};
-    final cars = carsMap.values.toList();
+    // final arguments = ModalRoute.of(context)?.settings.arguments as Map? ?? {};
+    // final carsMap = arguments['cars'] as Map<String, Car>? ?? {};
+    // final cars = carsMap.values.toList();
     // final List<dynamic> carData = arguments['cars'] ?? [];
     // final List<Car> cars = carData.map((item) => Car.fromJson(item)).toList();
 
-    // grid variables
-    final cols = 2;
-    final rows = (cars.length / cols).ceil();
-
     return Scaffold(
       appBar: MyAppBar(),
-      body: Container(
-        color: Colors.grey[50],
-        padding: EdgeInsets.all(8),
-        child: SingleChildScrollView(
-          child: LayoutGrid(
-            columnSizes: List.filled(cols, 1.fr),
-            rowSizes: List.filled(rows, auto),
-            rowGap: 8,
-            columnGap: 8,
-            children: [
-              for (final car in cars)
-                CarCard(
-                  car: car,
-                  // imagePath: car['image'] ?? 'no-image-car.svg',
-                  // name: '${car['brand']} ${car['name']}',
-                  // category: car['category'] ?? 'Unknown',
-                  // availability: true,
-                  // rate: double.tryParse('${car['rate']}') ?? 0,
-                  // price: double.tryParse('${car['price']}') ?? 0,
-                ),
-            ],
-          ),
-        ),
-
-        // child: GridView.builder(
-        //   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        //     crossAxisCount: 2,
-        //     crossAxisSpacing: 8,
-        //     mainAxisSpacing: 8,
-        //     childAspectRatio: 0.75,
-        //   ),
-        //   itemCount: cars.length,
-        //   itemBuilder: (context, index) {
-        //     final car = cars[index];
-        //     return CarCard(
-        //       imagePath: car['image'] ?? 'hero-car.png',
-        //       name: '${car['brand']} ${car['name']}',
-        //       category: car['category'] ?? 'Unknown',
-        //       availability: true,
-        //       rate: double.tryParse('${car['rate']}') ?? 0,
-        //       price: double.tryParse('${car['price']}') ?? 0,
-        //     );
-        //   },
-        // ),
+      body: FutureBuilder<List<Car>>(
+        future: getCars(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState != ConnectionState.done) {
+            return Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Failed to load cars'));
+          }
+          final cars = snapshot.data ?? [];
+          final cols = 2;
+          final rows = (cars.length / cols).ceil();
+          return Container(
+            color: Colors.grey[50],
+            padding: EdgeInsets.all(8),
+            child: SingleChildScrollView(
+              child: LayoutGrid(
+                columnSizes: List.filled(cols, 1.fr),
+                rowSizes: List.filled(rows, auto),
+                rowGap: 8,
+                columnGap: 8,
+                children: [for (final car in cars) CarCard(car: car)],
+              ),
+            ),
+          );
+        },
       ),
       bottomNavigationBar: MyNavigationBar(
         selectedIndex: _selectedIndex,

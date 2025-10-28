@@ -110,13 +110,13 @@ class _ProfileState extends State<Profile> {
                   fontFamily: 'Tajawal',
                 ),
               ),
-              TextButton(
-                onPressed: () {},
-                child: Text(
-                  'Update Password',
-                  style: TextStyle(color: Color(0xFF941B1D)),
-                ),
-              ),
+              // TextButton(
+              //   onPressed: () {},
+              //   child: Text(
+              //     'Update Password',
+              //     style: TextStyle(color: Color(0xFF941B1D)),
+              //   ),
+              // ),
               Divider(),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

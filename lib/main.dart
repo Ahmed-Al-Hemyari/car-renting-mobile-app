@@ -8,19 +8,18 @@ import 'package:car_renting/pages/home.dart';
 import 'package:car_renting/pages/loading.dart';
 import 'package:car_renting/pages/auth/profile.dart';
 import 'package:car_renting/pages/bookings/renting.dart';
-import 'package:car_renting/services/Car.dart';
 import 'package:car_renting/services/User.dart';
 import 'package:flutter/material.dart';
 
 void main() {
   runApp(
     MaterialApp(
-      initialRoute: '/car-show',
+      initialRoute: '/',
       routes: {
-        // '/': (context) => Loading(),
+        '/': (context) => Loading(),
         '/home': (context) => HomeScreen(),
         '/cars': (context) => Cars(),
-        '/car-show': (context) => CarShow(car: car2),
+        '/car-show': (context) => CarShow(),
         '/renting': (context) => Renting(),
         '/profile': (context) => Profile(),
         // Authentication

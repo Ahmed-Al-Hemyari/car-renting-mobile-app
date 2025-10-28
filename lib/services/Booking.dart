@@ -6,6 +6,7 @@ class Booking {
   final DateTime startDate;
   final DateTime endDate;
   final String status;
+  final bool rated;
 
   Booking({
     required this.id,
@@ -15,5 +16,6 @@ class Booking {
     required this.startDate,
     required this.endDate,
     required this.status,
+    required this.rated,
   });
 }
