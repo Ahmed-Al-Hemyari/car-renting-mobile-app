@@ -4,6 +4,7 @@ import 'package:car_renting/components/MyNavigationBar.dart';
 import 'package:car_renting/pages/loading.dart';
 import 'package:car_renting/services/Booking.dart';
 import 'package:car_renting/services/User.dart';
+import 'package:car_renting/utils/navigation_helpers.dart';
 import 'package:flutter/material.dart';
 // import 'package:flutter_svg/flutter_svg.dart';
 
@@ -16,59 +17,33 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   int _selectedIndex = 0;
+  final String url = "http://10.0.2.2:8000/api/bookings";
+
   @override
   void initState() {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final args = ModalRoute.of(context)?.settings.arguments as Map? ?? {};
-      // importing user
-      final userMap = args['user'] as Map<String, User>? ?? {};
-      final user = userMap.values.toList();
-      // importing bookings
-      final bookingsMap = args['bookings'] as Map<String, Booking>? ?? {};
-      final bookings = bookingsMap.values.toList();
+      // importing index
       final indexFromArgs = args['selectedIndex'] as int?;
       if (indexFromArgs != null && indexFromArgs != _selectedIndex) {
         setState(() {
           _selectedIndex = indexFromArgs;
         });
       }
+      // importing user
+      // final user = args['user'] is User ? args['user'] as User : null;
+      // importing bookings
+      // final bookingsMap = args['bookings'] as Map<String, Booking>? ?? {};
+      // final bookings = bookingsMap.values.toList();
     });
   }
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
-      switch (_selectedIndex) {
-        case 0:
-          Navigator.pushReplacementNamed(
-            context,
-            '/',
-            arguments: {'wantedRoute': '/home'},
-          );
-          break;
-        case 1:
-          Navigator.pushReplacementNamed(
-            context,
-            '/',
-            arguments: {'wantedRoute': '/cars'},
-          );
-          break;
-        case 2:
-          Navigator.pushReplacementNamed(
-            context,
-            '/',
-            arguments: {'wantedRoute': '/profile'},
-          );
-          break;
-        default:
-          Navigator.pushReplacementNamed(
-            context,
-            '/',
-            arguments: {'wantedRoute': '/home'},
-          );
-      }
+      handleNavigationTap(context, index);
     });
   }
 
@@ -89,7 +64,7 @@ class _ProfileState extends State<Profile> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    user.name,
+                    'Ahmed',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 22,
@@ -103,7 +78,7 @@ class _ProfileState extends State<Profile> {
                 ],
               ),
               Text(
-                user.email,
+                'ahmed@gmail.com',
                 style: TextStyle(
                   fontWeight: FontWeight.normal,
                   fontSize: 18,
@@ -222,11 +197,24 @@ class _ProfileState extends State<Profile> {
                 ],
               ),
               Expanded(
-                child: ListView(
-                  children: [
-                    BookingCard(booking: booking1),
-                    BookingCard(booking: booking2),
-                  ],
+                child: FutureBuilder<List<Booking>>(
+                  future: Booking.bookingIndex(url),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState != ConnectionState.done) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasError) {
+                      return Center(child: Text('Failed to load bookings'));
+                    }
+                    final bookings = snapshot.data ?? [];
+
+                    return ListView(
+                      children: [
+                        for (var booking in bookings)
+                          BookingCard(booking: booking),
+                      ],
+                    );
+                  },
                 ),
               ),
             ],

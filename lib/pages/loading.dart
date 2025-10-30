@@ -8,7 +8,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 final storage = FlutterSecureStorage();
-const baseUrl = "http://10.0.2.2:8000/api";
 
 class Loading extends StatefulWidget {
   const Loading({super.key});
@@ -18,26 +17,6 @@ class Loading extends StatefulWidget {
 }
 
 class _LoadingState extends State<Loading> {
-  // Future<List<dynamic>> getCars() async {
-  //   // Read the saved token
-  //   final token = await storage.read(key: 'token');
-
-  //   final res = await get(
-  //     Uri.parse('$baseUrl/cars'),
-  //     headers: {
-  //       'Accept': 'application/json', // Laravel expects this
-  //       'Authorization': 'Bearer $token', // Sanctum auth
-  //     },
-  //   );
-
-  //   // Handle response status
-  //   if (res.statusCode == 200) {
-  //     return jsonDecode(res.body); // returns a list of posts
-  //   } else {
-  //     throw Exception('Failed to load cars: ${res.statusCode}');
-  //   }
-  // }
-
   // Loading Pages
 
   Future<void> _loadHomePage() async {
@@ -49,17 +28,11 @@ class _LoadingState extends State<Loading> {
   }
 
   Future<void> _loadCarsPage() async {
-    try {
-      // final data = await getCars();
-      final cars = <String, Car>{'car1': car1, 'car2': car2};
-      Navigator.pushReplacementNamed(
-        context,
-        '/cars',
-        arguments: {'cars': cars, 'selectedIndex': 1},
-      );
-    } catch (e) {
-      print('Error: $e');
-    }
+    Navigator.pushReplacementNamed(
+      context,
+      '/cars',
+      arguments: {'selectedIndex': 1},
+    );
   }
 
   Future<void> _loadCarShowPage() async {
@@ -90,14 +63,10 @@ class _LoadingState extends State<Loading> {
   }
 
   Future<void> _loadProfilePage() async {
-    final bookings = <String, Booking>{
-      'booking1': booking1,
-      'booking2': booking2,
-    };
     Navigator.pushReplacementNamed(
       context,
       '/profile',
-      arguments: {'selectedIndex': 2, 'user': user, 'bookings': bookings},
+      arguments: {'selectedIndex': 2, 'user': user},
     );
   }
 

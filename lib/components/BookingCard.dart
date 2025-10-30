@@ -54,13 +54,40 @@ class BookingCard extends StatelessWidget {
               children: [
                 // --- Car image ---
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: SvgPicture.asset(
-                    'assets/images/no-image-car.svg',
-                    width: 100,
-                    height: 100,
-                    fit: BoxFit.cover,
-                  ),
+                  borderRadius: BorderRadiusGeometry.all(Radius.circular(15)),
+                  child:
+                      (booking.carImage != null && booking.carImage!.isNotEmpty)
+                      ? (booking.carImage!.toLowerCase().endsWith('.svg')
+                            ? SvgPicture.network(
+                                booking.carImage!,
+                                width: double.infinity,
+                                height: 100,
+                                fit: BoxFit.cover,
+                                placeholderBuilder: (context) => const Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              )
+                            : Image.network(
+                                booking.carImage!,
+                                width: double.infinity,
+                                height: 100,
+                                fit: BoxFit.cover,
+
+                                errorBuilder: (context, error, stackTrace) {
+                                  return SvgPicture.asset(
+                                    'assets/images/no-image-car.svg',
+                                    width: double.infinity,
+                                    height: 100,
+                                    fit: BoxFit.cover,
+                                  );
+                                },
+                              ))
+                      : SvgPicture.asset(
+                          'assets/images/no-image-car.svg',
+                          width: double.infinity,
+                          height: 100,
+                          fit: BoxFit.cover,
+                        ),
                 ),
 
                 const SizedBox(width: 8),

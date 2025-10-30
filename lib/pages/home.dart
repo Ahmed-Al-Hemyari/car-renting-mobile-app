@@ -1,5 +1,6 @@
 import 'package:car_renting/components/MyAppBar.dart';
 import 'package:car_renting/components/MyNavigationBar.dart';
+import 'package:car_renting/utils/navigation_helpers.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -32,35 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
-      switch (_selectedIndex) {
-        case 0:
-          Navigator.pushReplacementNamed(
-            context,
-            '/',
-            arguments: {'wantedRoute': '/home'},
-          );
-          break;
-        case 1:
-          Navigator.pushReplacementNamed(
-            context,
-            '/',
-            arguments: {'wantedRoute': '/cars'},
-          );
-          break;
-        case 2:
-          Navigator.pushReplacementNamed(
-            context,
-            '/',
-            arguments: {'wantedRoute': '/profile'},
-          );
-          break;
-        default:
-          Navigator.pushReplacementNamed(
-            context,
-            '/',
-            arguments: {'wantedRoute': '/home'},
-          );
-      }
+      handleNavigationTap(context, index);
     });
   }
 

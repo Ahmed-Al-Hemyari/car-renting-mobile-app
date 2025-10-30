@@ -18,37 +18,41 @@ class CarCard extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          (car.image != null && car.image!.isNotEmpty)
-              ? (car.image!.toLowerCase().endsWith('.svg')
-                    ? SvgPicture.network(
-                        car.image!,
-                        width: double.infinity,
-                        height: 100,
-                        fit: BoxFit.cover,
-                        placeholderBuilder: (context) =>
-                            const Center(child: CircularProgressIndicator()),
-                      )
-                    : Image.network(
-                        car.image!,
-                        width: double.infinity,
-                        height: 100,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return SvgPicture.asset(
-                            'assets/images/no-image-car.svg',
-                            width: double.infinity,
-                            height: 100,
-                            fit: BoxFit.cover,
-                          );
-                        },
-                      ))
-              : SvgPicture.asset(
-                  'assets/images/no-image-car.svg',
-                  width: double.infinity,
-                  height: 100,
-                  fit: BoxFit.cover,
-                ),
+          ClipRRect(
+            borderRadius: BorderRadiusGeometry.all(Radius.circular(15)),
+            child: (car.image != null && car.image!.isNotEmpty)
+                ? (car.image!.toLowerCase().endsWith('.svg')
+                      ? SvgPicture.network(
+                          car.image!,
+                          width: double.infinity,
+                          height: 100,
+                          fit: BoxFit.cover,
+                          placeholderBuilder: (context) =>
+                              const Center(child: CircularProgressIndicator()),
+                        )
+                      : Image.network(
+                          car.image!,
+                          width: double.infinity,
+                          height: 100,
+                          fit: BoxFit.cover,
 
+                          errorBuilder: (context, error, stackTrace) {
+                            return SvgPicture.asset(
+                              'assets/images/no-image-car.svg',
+                              width: double.infinity,
+                              height: 100,
+                              fit: BoxFit.cover,
+                            );
+                          },
+                        ))
+                : SvgPicture.asset(
+                    'assets/images/no-image-car.svg',
+                    width: double.infinity,
+                    height: 100,
+                    fit: BoxFit.cover,
+                  ),
+          ),
+          SizedBox(height: 10),
           Text(
             '${car.brand} ${car.name}',
             style: TextStyle(
