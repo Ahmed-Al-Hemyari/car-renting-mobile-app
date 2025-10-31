@@ -174,7 +174,7 @@ class _RentingState extends State<Renting> {
         ),
       ),
       bottomNavigationBar: MyNavigationBar(
-        selectedIndex: 1,
+        selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,
       ),
     );
