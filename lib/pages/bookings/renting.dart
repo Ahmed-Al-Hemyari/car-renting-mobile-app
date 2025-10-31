@@ -1,5 +1,6 @@
 import 'package:car_renting/components/MyAppBar.dart';
 import 'package:car_renting/components/MyNavigationBar.dart';
+import 'package:car_renting/utils/navigation_helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:car_renting/services/Car.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -17,35 +18,7 @@ class _RentingState extends State<Renting> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
-      switch (_selectedIndex) {
-        case 0:
-          Navigator.pushReplacementNamed(
-            context,
-            '/',
-            arguments: {'wantedRoute': '/home'},
-          );
-          break;
-        case 1:
-          Navigator.pushReplacementNamed(
-            context,
-            '/',
-            arguments: {'wantedRoute': '/cars'},
-          );
-          break;
-        case 2:
-          Navigator.pushReplacementNamed(
-            context,
-            '/',
-            arguments: {'wantedRoute': '/profile'},
-          );
-          break;
-        default:
-          Navigator.pushReplacementNamed(
-            context,
-            '/',
-            arguments: {'wantedRoute': '/home'},
-          );
-      }
+      handleNavigationTap(context, index);
     });
   }
 
@@ -65,27 +38,58 @@ class _RentingState extends State<Renting> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            if (car.image != '' && car.image!.isNotEmpty)
-              (car.image!.toLowerCase().endsWith('.svg')
-                  ? SvgPicture.asset(
-                      'assets/images/${car.image}',
+            ClipRRect(
+              borderRadius: BorderRadius.circular(15),
+              child: Builder(
+                builder: (context) {
+                  final imageUrl = car.image;
+                  final id = car.id;
+
+                  if (imageUrl == null || imageUrl.isEmpty) {
+                    return SvgPicture.asset(
+                      'assets/images/no-image-car.svg',
+                      key: ValueKey(id),
                       width: double.infinity,
-                      height: 120,
+                      height: 250,
                       fit: BoxFit.cover,
-                    )
-                  : Image.asset(
-                      'assets/images/${car.image}',
+                    );
+                  }
+
+                  if (imageUrl.toLowerCase().endsWith('.svg')) {
+                    return SvgPicture.network(
+                      imageUrl,
+                      key: ValueKey(id),
                       width: double.infinity,
-                      height: 120,
+                      height: 250,
                       fit: BoxFit.cover,
-                    ))
-            else
-              SvgPicture.asset(
-                'assets/images/no-image-car.svg',
-                width: double.infinity,
-                height: 120,
-                fit: BoxFit.cover,
+                      placeholderBuilder: (context) =>
+                          const Center(child: CircularProgressIndicator()),
+                    );
+                  }
+
+                  return Image.network(
+                    imageUrl,
+                    key: ValueKey(id),
+                    width: double.infinity,
+                    height: 250,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, progress) {
+                      if (progress == null) return child;
+                      return const Center(child: CircularProgressIndicator());
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return SvgPicture.asset(
+                        'assets/images/no-image-car.svg',
+                        key: ValueKey(id),
+                        width: double.infinity,
+                        height: 250,
+                        fit: BoxFit.cover,
+                      );
+                    },
+                  );
+                },
               ),
+            ),
 
             Text(
               '★ ${car.rate}',

@@ -36,17 +36,11 @@ class _LoadingState extends State<Loading> {
   }
 
   Future<void> _loadCarShowPage() async {
-    try {
-      // final data = await getCars();
-      // final cars = <String, Car>{'car1': car1, 'car2': car2};
-      Navigator.pushReplacementNamed(
-        context,
-        '/car-show',
-        arguments: {'car': car1, 'selectedIndex': 1},
-      );
-    } catch (e) {
-      print('Error: $e');
-    }
+    Navigator.pushReplacementNamed(
+      context,
+      '/car-show',
+      arguments: {'selectedIndex': 1},
+    );
   }
 
   Future<void> _loadRentingPage() async {
@@ -66,7 +60,7 @@ class _LoadingState extends State<Loading> {
     Navigator.pushReplacementNamed(
       context,
       '/profile',
-      arguments: {'selectedIndex': 2, 'user': user},
+      arguments: {'selectedIndex': 2},
     );
   }
 
@@ -108,54 +102,3 @@ class _LoadingState extends State<Loading> {
     );
   }
 }
-
-// example data
-final car1 = Car(
-  image: '',
-  brand: 'Toyota',
-  name: 'Prado',
-  category: 'SUV',
-  price: 100,
-  rate: 4.5,
-  unavailableDates: [
-    // Period(startDate: DateTime(2025, 9, 25), endDate: DateTime(2025, 10, 2)),
-    // Period(startDate: DateTime(2025, 10, 5), endDate: DateTime(2025, 10, 10)),
-    // Period(startDate: DateTime(2025, 10, 15), endDate: DateTime(2025, 10, 20)),
-  ],
-);
-final car2 = Car(
-  image: '',
-  brand: 'Toyota',
-  name: 'Land Cruiser',
-  category: 'SUV',
-  price: 150,
-  rate: 4.6,
-  unavailableDates: [
-    // Period(startDate: DateTime(2025, 9, 25), endDate: DateTime(2025, 9, 2)),
-    // Period(startDate: DateTime(2025, 10, 5), endDate: DateTime(2025, 10, 10)),
-    // Period(startDate: DateTime(2025, 10, 15), endDate: DateTime(2025, 10, 20)),
-  ],
-);
-
-final user = User(name: 'Ahmed', email: 'ahmed@gmail.com');
-
-final booking1 = Booking(
-  id: 1,
-  carImage: '',
-  carName: 'Toyota Prado',
-  carCategory: 'SUV',
-  startDate: DateTime(2025, 10, 20),
-  endDate: DateTime(2025, 10, 25),
-  status: 'pending',
-  rated: false,
-);
-final booking2 = Booking(
-  id: 1,
-  carImage: '',
-  carName: 'Toyota Land Cruiser',
-  carCategory: 'SUV',
-  startDate: DateTime(2025, 10, 21),
-  endDate: DateTime(2025, 10, 23),
-  status: 'completed',
-  rated: false,
-);

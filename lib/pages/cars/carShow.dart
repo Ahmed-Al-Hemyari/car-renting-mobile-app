@@ -1,6 +1,8 @@
+import 'package:car_renting/components/CarUnavailableCalendar.dart';
 import 'package:car_renting/components/MyAppBar.dart';
 import 'package:car_renting/components/MyNavigationBar.dart';
 import 'package:car_renting/services/Car.dart';
+import 'package:car_renting/utils/navigation_helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -13,154 +15,176 @@ class CarShow extends StatefulWidget {
 }
 
 class _CarShowState extends State<CarShow> {
+  int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Navigation Bar Management
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final args = ModalRoute.of(context)?.settings.arguments as Map? ?? {};
+      final indexFromArgs = args['selectedIndex'] as int?;
+      if (indexFromArgs != null && indexFromArgs != _selectedIndex) {
+        setState(() {
+          _selectedIndex = indexFromArgs;
+        });
+      }
+    });
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+      handleNavigationTap(context, index);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    // final arguments = ModalRoute.of(context)?.settings.arguments as Map? ?? {};
-    // final Car car = arguments['car'] as Car;
-    // List<DateTime> unavailableDays = [];
+    final args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ??
+        {};
+    final car = args['car'] as Car?;
 
-    // for (var period in car.unavailableDates) {
-    //   DateTime currentDate = period.startDate;
-
-    //   while (!currentDate.isAfter(period.endDate)) {
-    //     unavailableDays.add(currentDate);
-    //     currentDate.add(Duration(days: 1));
-    //   }
-    // }
-
-    // bool _isUnavailable(DateTime day) {
-    //   return unavailableDays.any(
-    //     (d) => d.year == day.year && d.month == day.month && d.day == day.day,
-    //   );
-    // }
-
-    // final Set<DateTime> days = {};
-    //
-
+    if (car == null) {
+      return Scaffold(body: Center(child: Text('Car not found!!')));
+    }
     return Scaffold(
       appBar: MyAppBar(),
-      body: Center(child: Text('Car Page')),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(15),
+                child: Builder(
+                  builder: (context) {
+                    final imageUrl = car.image;
+                    final id = car.id;
+
+                    if (imageUrl == null || imageUrl.isEmpty) {
+                      return SvgPicture.asset(
+                        'assets/images/no-image-car.svg',
+                        key: ValueKey(id),
+                        width: double.infinity,
+                        height: 250,
+                        fit: BoxFit.cover,
+                      );
+                    }
+
+                    if (imageUrl.toLowerCase().endsWith('.svg')) {
+                      return SvgPicture.network(
+                        imageUrl,
+                        key: ValueKey(id),
+                        width: double.infinity,
+                        height: 250,
+                        fit: BoxFit.cover,
+                        placeholderBuilder: (context) =>
+                            const Center(child: CircularProgressIndicator()),
+                      );
+                    }
+
+                    return Image.network(
+                      imageUrl,
+                      key: ValueKey(id),
+                      width: double.infinity,
+                      height: 250,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (context, child, progress) {
+                        if (progress == null) return child;
+                        return const Center(child: CircularProgressIndicator());
+                      },
+                      errorBuilder: (context, error, stackTrace) {
+                        return SvgPicture.asset(
+                          'assets/images/no-image-car.svg',
+                          key: ValueKey(id),
+                          width: double.infinity,
+                          height: 250,
+                          fit: BoxFit.cover,
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                '${car.brand} ${car.name}',
+                style: const TextStyle(
+                  fontSize: 27,
+                  fontFamily: 'Tajawal',
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              Text(
+                car.category,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontFamily: 'Tajawal',
+                  fontWeight: FontWeight.w400,
+                  color: Colors.grey[700],
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 10),
+              Column(
+                children: [
+                  Text(
+                    '★ ${car.rate}',
+                    style: TextStyle(
+                      color: Colors.amber[800],
+                      fontSize: 21,
+                      fontFamily: 'Tajawal',
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    '\$${car.price} /Day',
+                    style: TextStyle(
+                      color: Colors.grey[700],
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              CarUnavailableCalendar(unavailableDates: car.unavailableDates),
+              const SizedBox(height: 15),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(
+                      context,
+                      '/renting',
+                      arguments: {'car': car},
+                    );
+                  },
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStateProperty.all(Color(0xFF941B1D)),
+                    foregroundColor: WidgetStateProperty.all(Colors.white),
+                    shape: WidgetStateProperty.all(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                  child: const Text('Rent'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: MyNavigationBar(
+        selectedIndex: _selectedIndex,
+        onItemTapped: _onItemTapped,
+      ),
     );
   }
 }
-
-
-// return Scaffold(
-    //   appBar: MyAppBar(),
-    //   body: Center(
-    //     child: Container(
-    //       // padding: EdgeInsets.all(10),
-    //       color: Colors.grey[50],
-    //       // // decoration: BoxDecoration(
-    //       // //   shape: BorderRadius.circular(15),
-    //       // // ),
-    //       child: Expanded(
-    //         child: ListView(
-    //           children: [
-    //             Column(
-    //               children: [
-    //                 if (car.image != '' &&
-    //                     car.image!.isNotEmpty &&
-    //                     car.image != null)
-    //                   (car.image!.toLowerCase().endsWith('.svg')
-    //                       ? SvgPicture.asset(
-    //                           'assets/images/${car.image}',
-    //                           width: double.infinity,
-    //                           height: 300,
-    //                           fit: BoxFit.cover,
-    //                         )
-    //                       : Image.asset(
-    //                           'assets/images/${car.image}',
-    //                           width: double.infinity,
-    //                           height: 300,
-    //                           fit: BoxFit.cover,
-    //                         ))
-    //                 else
-    //                   SvgPicture.asset(
-    //                     'assets/images/no-image-car.svg',
-    //                     width: double.infinity,
-    //                     height: 300,
-    //                     fit: BoxFit.cover,
-    //                   ),
-    //                 Padding(
-    //                   padding: const EdgeInsets.symmetric(
-    //                     vertical: 15.0,
-    //                     horizontal: 50,
-    //                   ),
-    //                   child: Divider(thickness: 2),
-    //                 ),
-    //                 Text(
-    //                   '★ ${car.rate}',
-    //                   style: TextStyle(
-    //                     color: Colors.amber[800],
-    //                     fontSize: 20,
-    //                     fontFamily: 'Tajawal',
-    //                     fontWeight: FontWeight.bold,
-    //                   ),
-    //                 ),
-    //                 Text(
-    //                   '${car.brand} ${car.name}',
-    //                   style: TextStyle(
-    //                     fontSize: 33,
-    //                     fontFamily: 'Tajawal',
-    //                     fontWeight: FontWeight.bold,
-    //                   ),
-    //                   textAlign: TextAlign.center,
-    //                 ),
-    //                 Text(
-    //                   car.category,
-    //                   style: TextStyle(
-    //                     fontSize: 25,
-    //                     fontFamily: 'Tajawal',
-    //                     fontWeight: FontWeight.w400,
-    //                     color: Colors.grey[700],
-    //                   ),
-    //                   textAlign: TextAlign.center,
-    //                 ),
-    //                 Text(
-    //                   '\$${car.price} /Day',
-    //                   style: TextStyle(
-    //                     color: Colors.grey[700],
-    //                     fontSize: 20,
-    //                     fontWeight: FontWeight.bold,
-    //                   ),
-    //                 ),
-    //                 Padding(
-    //                   padding: const EdgeInsets.symmetric(
-    //                     vertical: 10,
-    //                     horizontal: 20,
-    //                   ),
-    //                   // child: TableCalendar(
-    //                   //   focusedDay: DateTime.now(),
-    //                   //   firstDay: DateTime(2025, 1, 1),
-    //                   //   lastDay: DateTime(2040, 12, 31),
-    //                   //   calendarBuilders: CalendarBuilders(
-    //                   //     defaultBuilder: (context, day, focusedDay) {
-    //                   //       if (_isUnavailable(day)) {
-    //                   //         return Container(
-    //                   //           margin: const EdgeInsets.all(6.0),
-    //                   //           decoration: BoxDecoration(
-    //                   //             color: Colors.redAccent.withOpacity(0.5),
-    //                   //             shape: BoxShape.circle,
-    //                   //           ),
-    //                   //           child: Center(
-    //                   //             child: Text(
-    //                   //               '${day.day}',
-    //                   //               style: const TextStyle(color: Colors.white),
-    //                   //             ),
-    //                   //           ),
-    //                   //         );
-    //                   //       }
-    //                   //       return null;
-    //                   //     },
-    //                   //   ),
-    //                   // ),
-    //                 ),
-    //               ],
-    //             ),
-    //           ],
-    //         ),
-    //       ),
-    //     ),
-    //   ),
-    // );

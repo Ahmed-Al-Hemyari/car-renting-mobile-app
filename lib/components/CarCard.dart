@@ -19,38 +19,59 @@ class CarCard extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           ClipRRect(
-            borderRadius: BorderRadiusGeometry.all(Radius.circular(15)),
-            child: (car.image != null && car.image!.isNotEmpty)
-                ? (car.image!.toLowerCase().endsWith('.svg')
-                      ? SvgPicture.network(
-                          car.image!,
-                          width: double.infinity,
-                          height: 100,
-                          fit: BoxFit.cover,
-                          placeholderBuilder: (context) =>
-                              const Center(child: CircularProgressIndicator()),
-                        )
-                      : Image.network(
-                          car.image!,
-                          width: double.infinity,
-                          height: 100,
-                          fit: BoxFit.cover,
+            borderRadius: BorderRadius.circular(15),
+            child: Builder(
+              builder: (context) {
+                final imageUrl = car.image;
+                final id = car.id;
 
-                          errorBuilder: (context, error, stackTrace) {
-                            return SvgPicture.asset(
-                              'assets/images/no-image-car.svg',
-                              width: double.infinity,
-                              height: 100,
-                              fit: BoxFit.cover,
-                            );
-                          },
-                        ))
-                : SvgPicture.asset(
+                // If no image, show placeholder
+                if (imageUrl == null || imageUrl.isEmpty) {
+                  return SvgPicture.asset(
                     'assets/images/no-image-car.svg',
+                    key: ValueKey(id),
                     width: double.infinity,
                     height: 100,
                     fit: BoxFit.cover,
-                  ),
+                  );
+                }
+
+                // SVG image
+                if (imageUrl.toLowerCase().endsWith('.svg')) {
+                  return SvgPicture.network(
+                    imageUrl,
+                    key: ValueKey(id),
+                    width: double.infinity,
+                    height: 100,
+                    fit: BoxFit.cover,
+                    placeholderBuilder: (context) =>
+                        const Center(child: CircularProgressIndicator()),
+                  );
+                }
+
+                // Other image formats (e.g., .webp, .png, .jpg)
+                return Image.network(
+                  imageUrl,
+                  key: ValueKey(id),
+                  width: double.infinity,
+                  height: 100,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return const Center(child: CircularProgressIndicator());
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return SvgPicture.asset(
+                      'assets/images/no-image-car.svg',
+                      key: ValueKey(id),
+                      width: double.infinity,
+                      height: 100,
+                      fit: BoxFit.cover,
+                    );
+                  },
+                );
+              },
+            ),
           ),
           SizedBox(height: 10),
           Text(
@@ -94,41 +115,14 @@ class CarCard extends StatelessWidget {
               ),
             ],
           ),
-
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.center,
-          //   crossAxisAlignment: CrossAxisAlignment.center,
-          //   children: [
-          //     Container(
-          //       height: 12,
-          //       width: 12,
-          //       margin: const EdgeInsets.only(right: 8),
-          //       decoration: BoxDecoration(
-          //         shape: BoxShape.circle,
-          //         color: car.availability ? Colors.green[400] : Colors.red[400],
-          //       ),
-          //     ),
-          //     const SizedBox(width: 4),
-          //     Center(
-          //       child: Text(
-          //         car.availability ? 'Available' : 'Unavailable',
-          //         style: TextStyle(
-          //           fontSize: 18,
-          //           fontFamily: 'Tajawal',
-          //           color: Colors.grey[800],
-          //         ),
-          //       ),
-          //     ),
-          //   ],
-          // ),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
                 Navigator.pushNamed(
                   context,
-                  '/',
-                  arguments: {'car': car, 'wantedRoute': '/car-show'},
+                  '/car-show',
+                  arguments: {'selectedIndex': 1, 'car': car},
                 );
               },
               style: ButtonStyle(

@@ -1,12 +1,9 @@
 import 'package:car_renting/components/BookingCard.dart';
 import 'package:car_renting/components/MyAppBar.dart';
 import 'package:car_renting/components/MyNavigationBar.dart';
-import 'package:car_renting/pages/loading.dart';
 import 'package:car_renting/services/Booking.dart';
-import 'package:car_renting/services/User.dart';
 import 'package:car_renting/utils/navigation_helpers.dart';
 import 'package:flutter/material.dart';
-// import 'package:flutter_svg/flutter_svg.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -25,18 +22,12 @@ class _ProfileState extends State<Profile> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final args = ModalRoute.of(context)?.settings.arguments as Map? ?? {};
-      // importing index
       final indexFromArgs = args['selectedIndex'] as int?;
       if (indexFromArgs != null && indexFromArgs != _selectedIndex) {
         setState(() {
           _selectedIndex = indexFromArgs;
         });
       }
-      // importing user
-      // final user = args['user'] is User ? args['user'] as User : null;
-      // importing bookings
-      // final bookingsMap = args['bookings'] as Map<String, Booking>? ?? {};
-      // final bookings = bookingsMap.values.toList();
     });
   }
 
@@ -51,179 +42,152 @@ class _ProfileState extends State<Profile> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: MyAppBar(),
-      body: Center(
+      body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(12.0),
-          child: Column(
-            children: [
-              CircleAvatar(
-                backgroundImage: AssetImage('assets/images/no-image-user.jpg'),
-                radius: 40.0,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Ahmed',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 22,
-                      fontFamily: 'Tajawal',
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () {},
-                    icon: Icon(Icons.edit, size: 18),
-                  ),
-                ],
-              ),
-              Text(
-                'ahmed@gmail.com',
-                style: TextStyle(
-                  fontWeight: FontWeight.normal,
-                  fontSize: 18,
-                  fontFamily: 'Tajawal',
-                ),
-              ),
-              // TextButton(
-              //   onPressed: () {},
-              //   child: Text(
-              //     'Update Password',
-              //     style: TextStyle(color: Color(0xFF941B1D)),
-              //   ),
-              // ),
-              Divider(),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.blue[50],
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Column(
-                          children: [
-                            Text(
-                              'Total Bookings',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontFamily: 'Tajawal',
-                                fontWeight: FontWeight.w400,
-                                color: Colors.grey[700],
-                              ),
-                            ),
-                            Text(
-                              '1',
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontFamily: 'Tajawal',
-                                color: Colors.blue[600],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.green[50],
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Column(
-                          children: [
-                            Text(
-                              'Active',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontFamily: 'Tajawal',
-                                fontWeight: FontWeight.w400,
-                                color: Colors.grey[700],
-                              ),
-                            ),
-                            Text(
-                              '5',
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontFamily: 'Tajawal',
-                                color: Colors.green[600],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Column(
-                          children: [
-                            Text(
-                              'Completed',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontFamily: 'Tajawal',
-                                fontWeight: FontWeight.w400,
-                                color: Colors.grey[700],
-                              ),
-                            ),
-                            Text(
-                              '2',
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontFamily: 'Tajawal',
-                                color: Colors.grey[700],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              Expanded(
-                child: FutureBuilder<List<Booking>>(
-                  future: Booking.bookingIndex(url),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState != ConnectionState.done) {
-                      return Center(child: CircularProgressIndicator());
-                    }
-                    if (snapshot.hasError) {
-                      return Center(child: Text('Failed to load bookings'));
-                    }
-                    final bookings = snapshot.data ?? [];
+          child: FutureBuilder<List<Booking>>(
+            future: Booking.bookingIndex(url),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return const Center(child: Text('Failed to load bookings'));
+              }
 
-                    return ListView(
+              final bookings = snapshot.data ?? [];
+
+              return SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const CircleAvatar(
+                      backgroundImage: AssetImage(
+                        'assets/images/no-image-user.jpg',
+                      ),
+                      radius: 40.0,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        for (var booking in bookings)
-                          BookingCard(booking: booking),
+                        const Text(
+                          'Ahmed',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 22,
+                            fontFamily: 'Tajawal',
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {},
+                          icon: const Icon(Icons.edit, size: 18),
+                        ),
                       ],
-                    );
-                  },
+                    ),
+                    const Text(
+                      'ahmed@gmail.com',
+                      style: TextStyle(
+                        fontWeight: FontWeight.normal,
+                        fontSize: 18,
+                        fontFamily: 'Tajawal',
+                      ),
+                    ),
+                    const Divider(),
+                    const SizedBox(height: 10),
+
+                    // Stats boxes
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildStatBox(
+                          title: 'Total Bookings',
+                          value: bookings.length.toString(),
+                          color: Colors.blue[600]!,
+                          bgColor: Colors.blue[50]!,
+                        ),
+                        const SizedBox(width: 10),
+                        _buildStatBox(
+                          title: 'Active',
+                          value: bookings
+                              .where((b) => b.status == 'active')
+                              .length
+                              .toString(),
+                          color: Colors.green[600]!,
+                          bgColor: Colors.green[50]!,
+                        ),
+                        const SizedBox(width: 10),
+                        _buildStatBox(
+                          title: 'Completed',
+                          value: bookings
+                              .where((b) => b.status == 'completed')
+                              .length
+                              .toString(),
+                          color: Colors.grey[700]!,
+                          bgColor: Colors.grey[100]!,
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Bookings list
+                    ListView.builder(
+                      shrinkWrap: true, // important
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: bookings.length,
+                      itemBuilder: (context, index) =>
+                          BookingCard(booking: bookings[index]),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+              );
+            },
           ),
         ),
       ),
       bottomNavigationBar: MyNavigationBar(
         selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,
+      ),
+    );
+  }
+
+  Widget _buildStatBox({
+    required String title,
+    required String value,
+    required Color color,
+    required Color bgColor,
+  }) {
+    return Expanded(
+      child: Container(
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Column(
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontFamily: 'Tajawal',
+                  fontWeight: FontWeight.w400,
+                  color: Colors.grey[700],
+                ),
+              ),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontFamily: 'Tajawal',
+                  color: color,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

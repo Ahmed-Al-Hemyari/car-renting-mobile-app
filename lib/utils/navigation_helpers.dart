@@ -27,7 +27,7 @@ void handleNavigationTap(BuildContext context, int index) {
       Navigator.pushReplacementNamed(
         context,
         '/',
-        arguments: {'wantedRoute': '/profile'},
+        arguments: {'wantedRoute': '/home'},
       );
   }
 }
