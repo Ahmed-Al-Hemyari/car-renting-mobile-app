@@ -3,6 +3,7 @@ import 'dart:convert';
 
 class Booking {
   final int id;
+  final int carId;
   final String carImage;
   final String carName;
   final String carCategory;
@@ -13,6 +14,7 @@ class Booking {
 
   Booking({
     required this.id,
+    required this.carId,
     required this.carImage,
     required this.carName,
     required this.carCategory,
@@ -48,6 +50,7 @@ class Booking {
 
     return Booking(
       id: json['id'] ?? 0,
+      carId: car['id'] ?? int,
       carImage: car['image'] ?? '',
       carName: displayName,
       carCategory: category['name'] ?? '',

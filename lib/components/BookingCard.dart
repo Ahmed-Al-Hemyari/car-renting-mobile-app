@@ -121,38 +121,57 @@ class _BookingCardState extends State<BookingCard> {
                 // Car image
                 ClipRRect(
                   borderRadius: BorderRadius.circular(15),
-                  child:
-                      (widget.booking.carImage != null &&
-                          widget.booking.carImage!.isNotEmpty)
-                      ? (widget.booking.carImage!.toLowerCase().endsWith('.svg')
-                            ? SvgPicture.network(
-                                widget.booking.carImage!,
-                                width: 120, // fixed width
-                                height: 100,
-                                fit: BoxFit.cover,
-                                placeholderBuilder: (context) => const Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              )
-                            : Image.network(
-                                widget.booking.carImage!,
-                                width: 120, // fixed width
-                                height: 100,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    SvgPicture.asset(
-                                      'assets/images/no-image-car.svg',
-                                      width: 120,
-                                      height: 100,
-                                      fit: BoxFit.cover,
-                                    ),
-                              ))
-                      : SvgPicture.asset(
+                  child: Builder(
+                    builder: (context) {
+                      final imageUrl = widget.booking.carImage;
+                      final id = widget.booking.carId;
+
+                      if (imageUrl.isEmpty) {
+                        return SvgPicture.asset(
                           'assets/images/no-image-car.svg',
-                          width: 120,
-                          height: 100,
+                          key: ValueKey(id),
+                          width: double.infinity,
+                          height: 250,
                           fit: BoxFit.cover,
-                        ),
+                        );
+                      }
+
+                      if (imageUrl.toLowerCase().endsWith('.svg')) {
+                        return SvgPicture.network(
+                          imageUrl,
+                          key: ValueKey(id),
+                          width: 120,
+                          height: 120,
+                          fit: BoxFit.cover,
+                          placeholderBuilder: (context) =>
+                              const Center(child: CircularProgressIndicator()),
+                        );
+                      }
+
+                      return Image.network(
+                        imageUrl,
+                        key: ValueKey(id),
+                        width: 120,
+                        height: 120,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (context, child, progress) {
+                          if (progress == null) return child;
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) {
+                          return SvgPicture.asset(
+                            'assets/images/no-image-car.svg',
+                            key: ValueKey(id),
+                            width: 120,
+                            height: 120,
+                            fit: BoxFit.cover,
+                          );
+                        },
+                      );
+                    },
+                  ),
                 ),
 
                 const SizedBox(width: 8),
