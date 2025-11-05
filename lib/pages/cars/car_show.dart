@@ -1,7 +1,7 @@
-import 'package:car_renting/components/CarUnavailableCalendar.dart';
-import 'package:car_renting/components/MyAppBar.dart';
-import 'package:car_renting/components/MyNavigationBar.dart';
-import 'package:car_renting/services/Car.dart';
+import 'package:car_renting/components/car_unavailable_calendar.dart';
+import 'package:car_renting/components/my_app_bar.dart';
+import 'package:car_renting/components/my_navigation_bar.dart';
+import 'package:car_renting/classes/car_class.dart';
 import 'package:car_renting/utils/navigation_helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';

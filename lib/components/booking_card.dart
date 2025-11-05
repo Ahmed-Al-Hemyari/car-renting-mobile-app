@@ -1,4 +1,4 @@
-import 'package:car_renting/services/Booking.dart';
+import 'package:car_renting/classes/booking_class.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 

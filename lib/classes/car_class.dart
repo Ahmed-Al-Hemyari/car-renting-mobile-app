@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-
 class Car {
   final int id;
   final String? image;
@@ -39,31 +36,4 @@ class Car {
           : (json['rate']?.toDouble() ?? 0.0),
     );
   }
-
-  static Future<List<Car>> carIndex(String url) async {
-    final response = await http.get(Uri.parse(url));
-
-    if (response.statusCode == 200) {
-      final body = json.decode(response.body);
-      final List<dynamic> carList = body['data'];
-
-      return carList.map((json) => Car.fromJson(json)).toList();
-    } else {
-      throw Exception('Failed to load cars');
-    }
-  }
-
-  // static Future<Car> carShow(String url) async {
-  //   final response = await http.get(Uri.parse(url));
-
-  //   if (response.statusCode == 200) {
-  //     final body = json.decode(response.body);
-
-  //     final carJson = body['data'];
-
-  //     return Car.fromJson(carJson);
-  //   } else {
-  //     throw Exception('Failed to load car');
-  //   }
-  // }
 }

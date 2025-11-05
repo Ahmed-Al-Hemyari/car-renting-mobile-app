@@ -1,7 +1,7 @@
-import 'package:car_renting/components/BookingCard.dart';
-import 'package:car_renting/components/MyAppBar.dart';
-import 'package:car_renting/components/MyNavigationBar.dart';
-import 'package:car_renting/services/Booking.dart';
+import 'package:car_renting/components/booking_card.dart';
+import 'package:car_renting/components/my_app_bar.dart';
+import 'package:car_renting/components/my_navigation_bar.dart';
+import 'package:car_renting/classes/booking_class.dart';
 import 'package:car_renting/utils/navigation_helpers.dart';
 import 'package:flutter/material.dart';
 

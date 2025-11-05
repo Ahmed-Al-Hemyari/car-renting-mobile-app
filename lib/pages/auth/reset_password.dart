@@ -1,4 +1,4 @@
-import 'package:car_renting/components/MyAppBar.dart';
+import 'package:car_renting/components/my_app_bar.dart';
 import 'package:flutter/material.dart';
 
 class ResetPassword extends StatelessWidget {

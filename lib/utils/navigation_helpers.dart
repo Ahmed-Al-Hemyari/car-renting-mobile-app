@@ -3,30 +3,34 @@ import 'package:flutter/widgets.dart';
 void handleNavigationTap(BuildContext context, int index) {
   switch (index) {
     case 0:
-      Navigator.pushReplacementNamed(
+      Navigator.pushNamedAndRemoveUntil(
         context,
         '/',
+        (Route<dynamic> route) => false,
         arguments: {'wantedRoute': '/home'},
       );
       break;
     case 1:
-      Navigator.pushReplacementNamed(
+      Navigator.pushNamedAndRemoveUntil(
         context,
         '/',
+        (Route<dynamic> route) => false,
         arguments: {'wantedRoute': '/cars'},
       );
       break;
     case 2:
-      Navigator.pushReplacementNamed(
+      Navigator.pushNamedAndRemoveUntil(
         context,
         '/',
+        (Route<dynamic> route) => false,
         arguments: {'wantedRoute': '/profile'},
       );
       break;
     default:
-      Navigator.pushReplacementNamed(
+      Navigator.pushNamedAndRemoveUntil(
         context,
         '/',
+        (Route<dynamic> route) => false,
         arguments: {'wantedRoute': '/home'},
       );
   }

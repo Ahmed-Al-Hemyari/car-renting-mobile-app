@@ -1,12 +1,17 @@
-import 'package:car_renting/components/MyAppBar.dart';
-import 'package:car_renting/services/User.dart';
+import 'package:car_renting/components/my_app_bar.dart';
+import 'package:car_renting/classes/user_class.dart';
 import 'package:flutter/material.dart';
 
-class EditProfile extends StatelessWidget {
+class EditProfile extends StatefulWidget {
   final User user;
 
   const EditProfile({super.key, required this.user});
 
+  @override
+  State<EditProfile> createState() => _EditProfileState();
+}
+
+class _EditProfileState extends State<EditProfile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,7 +53,7 @@ class EditProfile extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.all(15.0),
                     child: TextFormField(
-                      initialValue: user.name,
+                      initialValue: widget.user.name,
                       decoration: InputDecoration(
                         label: Text('Name'),
                         hintText: 'Enter you name',
@@ -79,7 +84,7 @@ class EditProfile extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.all(15.0),
                     child: TextFormField(
-                      initialValue: user.email,
+                      initialValue: widget.user.email,
                       decoration: InputDecoration(
                         label: Text('Email'),
                         hintText: 'Enter you email',

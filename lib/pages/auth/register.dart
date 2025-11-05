@@ -1,10 +1,61 @@
+import 'package:car_renting/classes/user_class.dart';
+import 'package:car_renting/services/auth_service.dart';
 import 'package:flutter/material.dart';
 
-class Register extends StatelessWidget {
+class Register extends StatefulWidget {
   const Register({super.key});
 
   @override
+  State<Register> createState() => _RegisterState();
+}
+
+class _RegisterState extends State<Register> {
+  @override
   Widget build(BuildContext context) {
+    final _authService = AuthService();
+    final _formKey = GlobalKey<FormState>();
+
+    // Inputs Controllers
+    final _nameController = TextEditingController();
+    final _emailController = TextEditingController();
+    final _passwordController = TextEditingController();
+    final _confirmPasswordController = TextEditingController();
+
+    bool _isLoading = false;
+
+    Future<void> _handleRegister() async {
+      if (!_formKey.currentState!.validate()) return;
+
+      setState(() => _isLoading = true);
+
+      final result = await _authService.register(
+        name: _nameController.text.trim(),
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+        passwordConfirmation: _confirmPasswordController.text,
+        url: 'http://localhost:8000/api/register',
+      );
+
+      setState(() => _isLoading = false);
+
+      if (result['success']) {
+        User user = result['user'];
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/profile',
+          (route) => false,
+          arguments: {'user': user},
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result['message'] ?? 'Registration failed'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+
     return Scaffold(
       body: Center(
         child: Column(
@@ -37,184 +88,151 @@ class Register extends StatelessWidget {
               ),
             ),
             SizedBox(height: 5),
-            Form(
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: TextField(
-                      decoration: InputDecoration(
-                        label: Text('Name'),
-                        hintText: 'Enter you name',
-                        prefixIcon: Icon(Icons.person),
+            Column(
+              children: [
+                // 🧾 Name
+                _buildTextField(
+                  controller: _nameController,
+                  label: 'Name',
+                  hint: 'Enter your name',
+                  icon: Icons.person,
+                  validator: (value) =>
+                      value == null || value.isEmpty ? 'Enter your name' : null,
+                ),
 
-                        filled: true,
-                        fillColor: Colors.grey[100],
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                          borderSide: BorderSide(
-                            color: Color.fromARGB(255, 202, 202, 202),
-                            width: 1,
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide(
-                            color: Color.fromARGB(255, 177, 177, 177),
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 20),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: TextField(
-                      decoration: InputDecoration(
-                        label: Text('Email'),
-                        hintText: 'Enter you email',
-                        prefixIcon: Icon(Icons.email_outlined),
+                // 📧 Email
+                _buildTextField(
+                  controller: _emailController,
+                  label: 'Email',
+                  hint: 'Enter your email',
+                  icon: Icons.email_outlined,
+                  validator: (value) {
+                    if (value == null || value.isEmpty)
+                      return 'Enter your email';
+                    if (!value.contains('@')) return 'Invalid email';
+                    return null;
+                  },
+                ),
 
-                        filled: true,
-                        fillColor: Colors.grey[100],
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                          borderSide: BorderSide(
-                            color: Color.fromARGB(255, 202, 202, 202),
-                            width: 1,
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide(
-                            color: Color.fromARGB(255, 177, 177, 177),
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 20),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: TextField(
-                      obscureText: true,
-                      decoration: InputDecoration(
-                        label: Text('Password'),
-                        hintText: 'Enter you password',
-                        prefixIcon: Icon(Icons.password_outlined),
+                // 🔒 Password
+                _buildTextField(
+                  controller: _passwordController,
+                  label: 'Password',
+                  hint: 'Enter your password',
+                  icon: Icons.password_outlined,
+                  isPassword: true,
+                  validator: (value) {
+                    if (value == null || value.length < 6) {
+                      return 'Password must be at least 6 characters';
+                    }
+                    return null;
+                  },
+                ),
 
-                        filled: true,
-                        fillColor: Colors.grey[100],
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                          borderSide: BorderSide(
-                            color: Color.fromARGB(255, 202, 202, 202),
-                            width: 1,
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide(
-                            color: Color.fromARGB(255, 177, 177, 177),
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 20),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: TextField(
-                      obscureText: true,
-                      decoration: InputDecoration(
-                        label: Text('Confirm Password'),
-                        hintText: 'Enter you password again',
-                        prefixIcon: Icon(Icons.password_outlined),
+                // 🔒 Confirm Password
+                _buildTextField(
+                  controller: _confirmPasswordController,
+                  label: 'Confirm Password',
+                  hint: 'Enter password again',
+                  icon: Icons.password_outlined,
+                  isPassword: true,
+                  validator: (value) {
+                    if (value != _passwordController.text) {
+                      return 'Passwords do not match';
+                    }
+                    return null;
+                  },
+                ),
 
-                        filled: true,
-                        fillColor: Colors.grey[100],
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                          borderSide: BorderSide(
-                            color: Color.fromARGB(255, 202, 202, 202),
-                            width: 1,
+                const SizedBox(height: 20),
+
+                _isLoading
+                    ? const CircularProgressIndicator()
+                    : ElevatedButton(
+                        onPressed: _handleRegister,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF941B1D),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 10,
+                            horizontal: 80,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
                           ),
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide(
-                            color: Color.fromARGB(255, 177, 177, 177),
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 20),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15.0),
-                    child: Row(
-                      children: [
-                        Text(
-                          "Already have an account?",
+                        child: const Text(
+                          'Register',
                           style: TextStyle(
                             fontFamily: 'Tajawal',
-                            fontSize: 17,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
                         ),
-                        TextButton(
-                          onPressed: () {},
-                          child: Text(
-                            "Login",
-                            style: TextStyle(
-                              fontFamily: 'Tajawal',
-                              fontSize: 17,
-                              fontWeight: FontWeight.w500,
-                              color: Color(0xFF941B1D),
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
+
+                const SizedBox(height: 20),
+
+                // Already have account?
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      "Already have an account?",
+                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 17),
                     ),
-                  ),
-                  SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {},
-                    style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all(
-                        Color(0xFF941B1D),
-                      ),
-                      padding: WidgetStateProperty.all(
-                        EdgeInsets.symmetric(vertical: 8, horizontal: 60),
-                      ),
-                      foregroundColor: WidgetStateProperty.all(Colors.white),
-                      shape: WidgetStateProperty.all(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            15,
-                          ), // <-- border radius
+                    TextButton(
+                      onPressed: () =>
+                          Navigator.pushReplacementNamed(context, '/login'),
+                      child: const Text(
+                        "Login",
+                        style: TextStyle(
+                          fontFamily: 'Tajawal',
+                          fontSize: 17,
+                          color: Color(0xFF941B1D),
                         ),
                       ),
                     ),
-                    child: Text(
-                      'Register',
-                      style: TextStyle(
-                        fontFamily: 'Tajawal',
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+              ],
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required IconData icon,
+    bool isPassword = false,
+    String? Function(String?)? validator,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.all(15.0),
+      child: TextFormField(
+        controller: controller,
+        obscureText: isPassword,
+        validator: validator,
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: hint,
+          prefixIcon: Icon(icon),
+          filled: true,
+          fillColor: Colors.grey[100],
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0)),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.0),
+            borderSide: const BorderSide(
+              color: Color.fromARGB(255, 177, 177, 177),
+              width: 2,
+            ),
+          ),
+        ),
+        style: const TextStyle(fontFamily: 'Tajawal', fontSize: 20),
       ),
     );
   }

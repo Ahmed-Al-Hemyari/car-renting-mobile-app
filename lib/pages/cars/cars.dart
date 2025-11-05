@@ -1,10 +1,11 @@
-import 'package:car_renting/components/MyAppBar.dart';
-import 'package:car_renting/components/MyNavigationBar.dart';
-import 'package:car_renting/services/Car.dart';
+import 'package:car_renting/components/my_app_bar.dart';
+import 'package:car_renting/components/my_navigation_bar.dart';
+import 'package:car_renting/classes/car_class.dart';
 import 'package:car_renting/utils/navigation_helpers.dart';
 import 'package:flutter/material.dart';
-import 'package:car_renting/components/CarCard.dart';
+import 'package:car_renting/components/car_card.dart';
 import 'package:flutter_layout_grid/flutter_layout_grid.dart';
+import 'package:car_renting/services/car_service.dart';
 
 class Cars extends StatefulWidget {
   const Cars({super.key});
@@ -45,7 +46,7 @@ class _CarsState extends State<Cars> {
     return Scaffold(
       appBar: MyAppBar(),
       body: FutureBuilder<List<Car>>(
-        future: Car.carIndex(url),
+        future: CarIndex(url),
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
             return Center(child: CircularProgressIndicator());
