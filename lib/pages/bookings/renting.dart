@@ -1,5 +1,8 @@
+import 'dart:ui';
+
 import 'package:car_renting/components/my_app_bar.dart';
 import 'package:car_renting/components/my_navigation_bar.dart';
+import 'package:car_renting/services/auth_service.dart';
 import 'package:car_renting/utils/navigation_helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:car_renting/classes/car_class.dart';
@@ -16,6 +19,8 @@ class Renting extends StatefulWidget {
 }
 
 class _RentingState extends State<Renting> {
+  final authService = AuthService();
+
   int _selectedIndex = 1;
   void _onItemTapped(int index) {
     setState(() {
@@ -67,25 +72,40 @@ class _RentingState extends State<Renting> {
       return;
     }
 
+    final user = await authService.getUser();
+    if (user == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('User not logged in')));
+      return;
+    }
+
     try {
+      final token = await authService.getToken();
+
       final response = await http.post(
         Uri.parse(url),
-        body: {
-          'user_id': '1', // temporary placeholder — replace with real user ID
-          'car_id': car.id.toString(),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'user_id': user.id,
+          'car_id': car.id,
           'start_date': _startDate!.toIso8601String(),
           'end_date': _endDate!.toIso8601String(),
-          'total_days': _totalDays.toString(),
-        },
+          'total_days': _totalDays,
+          'notes': _notes.text.trim(),
+        }),
       );
 
       final jsonResponse = jsonDecode(response.body);
       print('📦 Response: $jsonResponse');
 
-      if (!context.mounted) return; // ✅ Prevents "deactivated widget" error
+      if (!context.mounted) return;
 
       if (response.statusCode == 200 && jsonResponse['success'] == true) {
-        // ✅ Show success message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -96,7 +116,6 @@ class _RentingState extends State<Renting> {
           ),
         );
 
-        // Wait briefly before navigation (so the snackbar can show)
         await Future.delayed(const Duration(seconds: 2));
 
         if (!context.mounted) return;
@@ -107,7 +126,6 @@ class _RentingState extends State<Renting> {
           arguments: {'selectedIndex': 2},
         );
       } else {
-        // ❌ API returned an error
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -118,7 +136,6 @@ class _RentingState extends State<Renting> {
         );
       }
     } catch (e) {
-      // ⚠️ Network or unexpected error
       print('⚠️ Error creating booking: $e');
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -297,24 +314,19 @@ class _RentingState extends State<Renting> {
 
                           const SizedBox(height: 15),
 
-                          TextFormField(
-                            maxLines: 5,
-                            minLines: 1,
-                            keyboardType: TextInputType.multiline,
-                            decoration: InputDecoration(
-                              labelText: 'Notes...',
-                              hintText: 'Enter any additional information here',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: Colors.grey),
-                              ),
-                              contentPadding: const EdgeInsets.all(16),
+                          SizedBox(
+                            width: double.infinity,
+                            child: _buildTextField(
+                              controller: _notes,
+                              label: 'Notes',
+                              hint: 'Type any additional notes here...',
+                              icon: Icons.notes,
+                              validator: (value) {
+                                if (value == null || value.isEmpty)
+                                  return 'Type any additional notes here...';
+                                return null;
+                              },
                             ),
-                            // onChanged: (value) {
-                            //   setState(() {
-                            //     _notes = value;
-                            //   });
-                            // },
                           ),
 
                           const SizedBox(height: 15),
@@ -458,6 +470,40 @@ class _RentingState extends State<Renting> {
       bottomNavigationBar: MyNavigationBar(
         selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required IconData icon,
+    bool isPassword = false,
+    String? Function(String?)? validator,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.all(15.0),
+      child: TextFormField(
+        controller: controller,
+        obscureText: isPassword,
+        validator: validator,
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: hint,
+          prefixIcon: Icon(icon),
+          filled: true,
+          fillColor: Colors.grey[100],
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0)),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.0),
+            borderSide: const BorderSide(
+              color: Color.fromARGB(255, 177, 177, 177),
+              width: 2,
+            ),
+          ),
+        ),
+        style: const TextStyle(fontFamily: 'Tajawal', fontSize: 20),
       ),
     );
   }

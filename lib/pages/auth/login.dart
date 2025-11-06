@@ -1,10 +1,50 @@
+import 'package:car_renting/services/auth_service.dart';
 import 'package:flutter/material.dart';
 
-class Login extends StatelessWidget {
+class Login extends StatefulWidget {
   const Login({super.key});
 
   @override
+  State<Login> createState() => _LoginState();
+}
+
+class _LoginState extends State<Login> {
+  @override
   Widget build(BuildContext context) {
+    final _authService = AuthService();
+    final _formKey = GlobalKey<FormState>();
+
+    // Inputs Controllers
+    final _emailController = TextEditingController();
+    final _passwordController = TextEditingController();
+
+    bool _isLoading = false;
+
+    Future<void> _handleLogin() async {
+      if (!_formKey.currentState!.validate()) return;
+
+      setState(() => _isLoading = true);
+
+      final result = await _authService.login(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+        url: "http://10.0.2.2:8000/api/login",
+      );
+
+      setState(() => _isLoading = false);
+
+      if (result['success']) {
+        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result['message'] ?? 'Registration failed'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+
     return Scaffold(
       body: Center(
         child: Column(
@@ -38,126 +78,128 @@ class Login extends StatelessWidget {
             ),
             SizedBox(height: 5),
             Form(
+              key: _formKey,
               child: Column(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: TextField(
-                      decoration: InputDecoration(
-                        label: Text('Email'),
-                        hintText: 'Enter you email',
-                        prefixIcon: Icon(Icons.email_outlined),
-
-                        filled: true,
-                        fillColor: Colors.grey[100],
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                          borderSide: BorderSide(
-                            color: Color.fromARGB(255, 202, 202, 202),
-                            width: 1,
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide(
-                            color: Color.fromARGB(255, 177, 177, 177),
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 20),
-                    ),
+                  // 📧 Email
+                  _buildTextField(
+                    controller: _emailController,
+                    label: 'Email',
+                    hint: 'Enter your email',
+                    icon: Icons.email_outlined,
+                    validator: (value) {
+                      if (value == null || value.isEmpty)
+                        return 'Enter your email';
+                      if (!value.contains('@')) return 'Invalid email';
+                      return null;
+                    },
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: TextField(
-                      obscureText: true,
-                      decoration: InputDecoration(
-                        label: Text('Password'),
-                        hintText: 'Enter you password',
-                        prefixIcon: Icon(Icons.password_outlined),
 
-                        filled: true,
-                        fillColor: Colors.grey[100],
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                          borderSide: BorderSide(
-                            color: Color.fromARGB(255, 202, 202, 202),
-                            width: 1,
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide(
-                            color: Color.fromARGB(255, 177, 177, 177),
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 20),
-                    ),
+                  // 🔒 Password
+                  _buildTextField(
+                    controller: _passwordController,
+                    label: 'Password',
+                    hint: 'Enter your password',
+                    icon: Icons.password_outlined,
+                    isPassword: true,
+                    validator: (value) {
+                      if (value == null || value.length < 6) {
+                        return 'Password must be at least 6 characters';
+                      }
+                      return null;
+                    },
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15.0),
-                    child: Row(
-                      children: [
-                        Text(
-                          "Don't have an account?",
-                          style: TextStyle(
-                            fontFamily: 'Tajawal',
-                            fontSize: 17,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black,
+
+                  _isLoading
+                      ? const CircularProgressIndicator()
+                      : ElevatedButton(
+                          onPressed: _handleLogin,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF941B1D),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 10,
+                              horizontal: 80,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
                           ),
-                        ),
-                        TextButton(
-                          onPressed: () {},
-                          child: Text(
-                            "Register",
+                          child: const Text(
+                            'Login',
                             style: TextStyle(
                               fontFamily: 'Tajawal',
-                              fontSize: 17,
-                              fontWeight: FontWeight.w500,
-                              color: Color(0xFF941B1D),
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {},
-                    style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all(
-                        Color(0xFF941B1D),
+
+                  const SizedBox(height: 20),
+
+                  // Don't have account?
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "Don't have an account?",
+                        style: TextStyle(fontFamily: 'Tajawal', fontSize: 17),
                       ),
-                      padding: WidgetStateProperty.all(
-                        EdgeInsets.symmetric(vertical: 8, horizontal: 60),
-                      ),
-                      foregroundColor: WidgetStateProperty.all(Colors.white),
-                      shape: WidgetStateProperty.all(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            15,
-                          ), // <-- border radius
+                      TextButton(
+                        onPressed: () => Navigator.pushReplacementNamed(
+                          context,
+                          '/register',
+                        ),
+                        child: const Text(
+                          "Register",
+                          style: TextStyle(
+                            fontFamily: 'Tajawal',
+                            fontSize: 17,
+                            color: Color(0xFF941B1D),
+                          ),
                         ),
                       ),
-                    ),
-                    child: Text(
-                      'Login',
-                      style: TextStyle(
-                        fontFamily: 'Tajawal',
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    ],
                   ),
                 ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required IconData icon,
+    bool isPassword = false,
+    String? Function(String?)? validator,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.all(15.0),
+      child: TextFormField(
+        controller: controller,
+        obscureText: isPassword,
+        validator: validator,
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: hint,
+          prefixIcon: Icon(icon),
+          filled: true,
+          fillColor: Colors.grey[100],
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0)),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.0),
+            borderSide: const BorderSide(
+              color: Color.fromARGB(255, 177, 177, 177),
+              width: 2,
+            ),
+          ),
+        ),
+        style: const TextStyle(fontFamily: 'Tajawal', fontSize: 20),
       ),
     );
   }

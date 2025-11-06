@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 // import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:car_renting/services/auth_service.dart';
 
 final storage = FlutterSecureStorage();
 
@@ -15,22 +16,31 @@ class Loading extends StatefulWidget {
 }
 
 class _LoadingState extends State<Loading> {
+  final authService = AuthService();
   // Loading Pages
 
   Future<void> _loadHomePage() async {
-    Navigator.pushReplacementNamed(
-      context,
-      '/home',
-      arguments: {'selectedIndex': 0},
-    );
+    if (await authService.isAuthenticated()) {
+      Navigator.pushReplacementNamed(
+        context,
+        '/home',
+        arguments: {'selectedIndex': 0},
+      );
+    } else {
+      Navigator.pushReplacementNamed(context, '/login');
+    }
   }
 
   Future<void> _loadCarsPage() async {
-    Navigator.pushReplacementNamed(
-      context,
-      '/cars',
-      arguments: {'selectedIndex': 1},
-    );
+    if (await authService.isAuthenticated()) {
+      Navigator.pushReplacementNamed(
+        context,
+        '/cars',
+        arguments: {'selectedIndex': 1},
+      );
+    } else {
+      Navigator.pushReplacementNamed(context, '/login');
+    }
   }
 
   Future<void> _loadCarShowPage() async {
@@ -55,11 +65,15 @@ class _LoadingState extends State<Loading> {
   }
 
   Future<void> _loadProfilePage() async {
-    Navigator.pushReplacementNamed(
-      context,
-      '/profile',
-      arguments: {'selectedIndex': 2},
-    );
+    if (await authService.isAuthenticated()) {
+      Navigator.pushReplacementNamed(
+        context,
+        '/profile',
+        arguments: {'selectedIndex': 2, 'user': authService.getUser()},
+      );
+    } else {
+      Navigator.pushReplacementNamed(context, '/login');
+    }
   }
 
   @override
@@ -95,7 +109,7 @@ class _LoadingState extends State<Loading> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blueGrey[900],
+      backgroundColor: Color(0xFF101828),
       body: Center(child: SpinKitCubeGrid(color: Colors.grey[200])),
     );
   }

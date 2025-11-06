@@ -1,4 +1,6 @@
 import 'package:car_renting/classes/booking_class.dart';
+import 'package:car_renting/services/auth_service.dart';
+import 'package:car_renting/services/booking_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -12,11 +14,14 @@ class BookingCard extends StatefulWidget {
 }
 
 class _BookingCardState extends State<BookingCard> {
+  final bookingService = BookingService();
+  final authService = AuthService();
+
   void _cancelBooking(BuildContext context, int bookingId) async {
     final url = "http://10.0.2.2:8000/api/bookings/$bookingId";
 
     try {
-      await Booking.cancelBooking(bookingId, url);
+      await bookingService.CancelBooking(bookingId, url);
 
       Navigator.pushReplacementNamed(context, '/profile');
 
@@ -285,7 +290,17 @@ class _BookingCardState extends State<BookingCard> {
                 widget.booking.rated == false &&
                         widget.booking.status == 'completed'
                     ? ElevatedButton.icon(
-                        onPressed: () {},
+                        onPressed: () async {
+                          Navigator.pushNamed(
+                            context,
+                            '/rating',
+                            arguments: {
+                              'carId': widget.booking.carId,
+                              'user': await authService.getUser(),
+                              'bookingId': widget.booking.id,
+                            },
+                          );
+                        },
                         icon: const Icon(Icons.rate_review, size: 16),
                         label: const Text(
                           'Rate',

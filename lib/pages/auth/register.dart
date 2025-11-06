@@ -1,4 +1,4 @@
-import 'package:car_renting/classes/user_class.dart';
+// import 'package:car_renting/classes/user_class.dart';
 import 'package:car_renting/services/auth_service.dart';
 import 'package:flutter/material.dart';
 
@@ -33,19 +33,14 @@ class _RegisterState extends State<Register> {
         email: _emailController.text.trim(),
         password: _passwordController.text,
         passwordConfirmation: _confirmPasswordController.text,
-        url: 'http://localhost:8000/api/register',
+        url: "http://10.0.2.2:8000/api/register",
       );
 
       setState(() => _isLoading = false);
 
       if (result['success']) {
-        User user = result['user'];
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          '/profile',
-          (route) => false,
-          arguments: {'user': user},
-        );
+        // User user = result['user'];
+        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -88,114 +83,118 @@ class _RegisterState extends State<Register> {
               ),
             ),
             SizedBox(height: 5),
-            Column(
-              children: [
-                // 🧾 Name
-                _buildTextField(
-                  controller: _nameController,
-                  label: 'Name',
-                  hint: 'Enter your name',
-                  icon: Icons.person,
-                  validator: (value) =>
-                      value == null || value.isEmpty ? 'Enter your name' : null,
-                ),
+            Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  // 🧾 Name
+                  _buildTextField(
+                    controller: _nameController,
+                    label: 'Name',
+                    hint: 'Enter your name',
+                    icon: Icons.person,
+                    validator: (value) => value == null || value.isEmpty
+                        ? 'Enter your name'
+                        : null,
+                  ),
 
-                // 📧 Email
-                _buildTextField(
-                  controller: _emailController,
-                  label: 'Email',
-                  hint: 'Enter your email',
-                  icon: Icons.email_outlined,
-                  validator: (value) {
-                    if (value == null || value.isEmpty)
-                      return 'Enter your email';
-                    if (!value.contains('@')) return 'Invalid email';
-                    return null;
-                  },
-                ),
+                  // 📧 Email
+                  _buildTextField(
+                    controller: _emailController,
+                    label: 'Email',
+                    hint: 'Enter your email',
+                    icon: Icons.email_outlined,
+                    validator: (value) {
+                      if (value == null || value.isEmpty)
+                        return 'Enter your email';
+                      if (!value.contains('@')) return 'Invalid email';
+                      return null;
+                    },
+                  ),
 
-                // 🔒 Password
-                _buildTextField(
-                  controller: _passwordController,
-                  label: 'Password',
-                  hint: 'Enter your password',
-                  icon: Icons.password_outlined,
-                  isPassword: true,
-                  validator: (value) {
-                    if (value == null || value.length < 6) {
-                      return 'Password must be at least 6 characters';
-                    }
-                    return null;
-                  },
-                ),
+                  // 🔒 Password
+                  _buildTextField(
+                    controller: _passwordController,
+                    label: 'Password',
+                    hint: 'Enter your password',
+                    icon: Icons.password_outlined,
+                    isPassword: true,
+                    validator: (value) {
+                      if (value == null || value.length < 6) {
+                        return 'Password must be at least 6 characters';
+                      }
+                      return null;
+                    },
+                  ),
 
-                // 🔒 Confirm Password
-                _buildTextField(
-                  controller: _confirmPasswordController,
-                  label: 'Confirm Password',
-                  hint: 'Enter password again',
-                  icon: Icons.password_outlined,
-                  isPassword: true,
-                  validator: (value) {
-                    if (value != _passwordController.text) {
-                      return 'Passwords do not match';
-                    }
-                    return null;
-                  },
-                ),
+                  // 🔒 Confirm Password
+                  _buildTextField(
+                    controller: _confirmPasswordController,
+                    label: 'Confirm Password',
+                    hint: 'Enter password again',
+                    icon: Icons.password_outlined,
+                    isPassword: true,
+                    validator: (value) {
+                      if (value != _passwordController.text) {
+                        return 'Passwords do not match';
+                      }
+                      return null;
+                    },
+                  ),
 
-                const SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
-                _isLoading
-                    ? const CircularProgressIndicator()
-                    : ElevatedButton(
-                        onPressed: _handleRegister,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF941B1D),
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 10,
-                            horizontal: 80,
+                  _isLoading
+                      ? const CircularProgressIndicator()
+                      : ElevatedButton(
+                          onPressed: _handleRegister,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF941B1D),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 10,
+                              horizontal: 80,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
                           ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
+                          child: const Text(
+                            'Register',
+                            style: TextStyle(
+                              fontFamily: 'Tajawal',
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
+
+                  const SizedBox(height: 20),
+
+                  // Already have account?
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "Already have an account?",
+                        style: TextStyle(fontFamily: 'Tajawal', fontSize: 17),
+                      ),
+                      TextButton(
+                        onPressed: () =>
+                            Navigator.pushReplacementNamed(context, '/login'),
                         child: const Text(
-                          'Register',
+                          "Login",
                           style: TextStyle(
                             fontFamily: 'Tajawal',
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            fontSize: 17,
+                            color: Color(0xFF941B1D),
                           ),
                         ),
                       ),
-
-                const SizedBox(height: 20),
-
-                // Already have account?
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      "Already have an account?",
-                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 17),
-                    ),
-                    TextButton(
-                      onPressed: () =>
-                          Navigator.pushReplacementNamed(context, '/login'),
-                      child: const Text(
-                        "Login",
-                        style: TextStyle(
-                          fontFamily: 'Tajawal',
-                          fontSize: 17,
-                          color: Color(0xFF941B1D),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
           ],
         ),

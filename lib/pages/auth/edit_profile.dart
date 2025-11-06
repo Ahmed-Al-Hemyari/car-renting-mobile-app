@@ -3,9 +3,7 @@ import 'package:car_renting/classes/user_class.dart';
 import 'package:flutter/material.dart';
 
 class EditProfile extends StatefulWidget {
-  final User user;
-
-  const EditProfile({super.key, required this.user});
+  const EditProfile({super.key});
 
   @override
   State<EditProfile> createState() => _EditProfileState();
@@ -14,6 +12,10 @@ class EditProfile extends StatefulWidget {
 class _EditProfileState extends State<EditProfile> {
   @override
   Widget build(BuildContext context) {
+    final args =
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    final user = args['user'] as User;
+
     return Scaffold(
       appBar: MyAppBar(),
       body: Center(
@@ -53,7 +55,7 @@ class _EditProfileState extends State<EditProfile> {
                   Padding(
                     padding: const EdgeInsets.all(15.0),
                     child: TextFormField(
-                      initialValue: widget.user.name,
+                      initialValue: user.name,
                       decoration: InputDecoration(
                         label: Text('Name'),
                         hintText: 'Enter you name',
@@ -84,7 +86,7 @@ class _EditProfileState extends State<EditProfile> {
                   Padding(
                     padding: const EdgeInsets.all(15.0),
                     child: TextFormField(
-                      initialValue: widget.user.email,
+                      initialValue: user.email,
                       decoration: InputDecoration(
                         label: Text('Email'),
                         hintText: 'Enter you email',
