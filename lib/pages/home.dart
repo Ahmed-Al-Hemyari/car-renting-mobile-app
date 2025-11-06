@@ -13,15 +13,23 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   final TextEditingController _searchController = TextEditingController();
+  final Color mainColor = const Color(0xFF941B1D);
 
   @override
   void initState() {
     super.initState();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final args = ModalRoute.of(context)?.settings.arguments as Map? ?? {};
-      final indexFromArgs = args['selectedIndex'] as int?;
-      if (indexFromArgs != null && indexFromArgs != _selectedIndex) {
-        setState(() => _selectedIndex = indexFromArgs);
+      final args =
+          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+
+      if (args != null) {
+        final indexFromArgs = args['selectedIndex'] as int?;
+        if (indexFromArgs != null && indexFromArgs != _selectedIndex) {
+          setState(() {
+            _selectedIndex = indexFromArgs;
+          });
+        }
       }
     });
   }
@@ -33,10 +41,22 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void _searchCars(String query) {
+    if (query.trim().isEmpty) return;
+    Navigator.pushNamed(
+      context,
+      '/cars',
+      arguments: {'search': query.trim(), 'selectedIndex': 1},
+    );
+    _searchController.clear();
+  }
+
+  void _browseAllCars() {
+    Navigator.pushNamed(context, '/cars', arguments: {'selectedIndex': 1});
+  }
+
   @override
   Widget build(BuildContext context) {
-    final Color mainColor = const Color(0xFF941B1D);
-
     return Scaffold(
       appBar: MyAppBar(),
       body: SingleChildScrollView(
@@ -72,6 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1.5,
                         ),
+                        textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 8),
                       Text(
@@ -95,6 +116,8 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: TextField(
                 controller: _searchController,
+                textInputAction: TextInputAction.search,
+                onSubmitted: _searchCars,
                 decoration: InputDecoration(
                   hintText: 'Search by brand or model...',
                   hintStyle: const TextStyle(fontFamily: 'Tajawal'),
@@ -116,40 +139,26 @@ class _HomeScreenState extends State<HomeScreen> {
 
             const SizedBox(height: 30),
 
-            // --- Category Section ---
+            // --- Categories ---
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildCategoryItem('Eco', 'assets/images/eco.png', mainColor),
-                  _buildCategoryItem(
-                    'Safety',
-                    'assets/images/safety.png',
-                    mainColor,
-                  ),
-                  _buildCategoryItem(
-                    'Easy',
-                    'assets/images/mobile.png',
-                    mainColor,
-                  ),
+                  _buildCategoryItem('Eco', 'assets/images/eco.png'),
+                  _buildCategoryItem('Safety', 'assets/images/safety.png'),
+                  _buildCategoryItem('Easy', 'assets/images/mobile.png'),
                 ],
               ),
             ),
 
             const SizedBox(height: 35),
 
-            // --- Browse Cars Button ---
+            // --- Browse All Cars Button ---
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 40),
               child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamedAndRemoveUntil(
-                    context,
-                    '/cars',
-                    (route) => false,
-                  );
-                },
+                onPressed: _browseAllCars,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: mainColor,
                   padding: const EdgeInsets.symmetric(vertical: 14),
@@ -183,16 +192,16 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildCategoryItem(String label, String iconPath, Color color) {
+  Widget _buildCategoryItem(String label, String iconPath) {
     return Column(
       children: [
         Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: mainColor.withOpacity(0.1),
             borderRadius: BorderRadius.circular(16),
           ),
-          child: Image.asset(iconPath, width: 50, height: 50, color: color),
+          child: Image.asset(iconPath, width: 50, height: 50, color: mainColor),
         ),
         const SizedBox(height: 10),
         Text(
@@ -201,7 +210,7 @@ class _HomeScreenState extends State<HomeScreen> {
             fontFamily: 'Tajawal',
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: color,
+            color: mainColor,
           ),
         ),
       ],

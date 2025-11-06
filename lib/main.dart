@@ -1,7 +1,6 @@
 import 'package:car_renting/pages/auth/edit_profile.dart';
 import 'package:car_renting/pages/auth/login.dart';
 import 'package:car_renting/pages/auth/register.dart';
-import 'package:car_renting/pages/auth/reset_password.dart';
 import 'package:car_renting/pages/bookings/rate_page.dart';
 import 'package:car_renting/pages/cars/car_show.dart';
 import 'package:car_renting/pages/cars/cars.dart';
@@ -27,7 +26,6 @@ void main() async {
         '/login': (context) => Login(),
         '/register': (context) => Register(),
         '/edit-profile': (context) => EditProfile(),
-        '/reset-password': (context) => ResetPassword(),
         // Rating
         '/rating': (context) => RatePage(),
       },

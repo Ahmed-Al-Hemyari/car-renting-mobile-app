@@ -1,6 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:car_renting/components/my_app_bar.dart';
 import 'package:car_renting/classes/user_class.dart';
-import 'package:flutter/material.dart';
+import 'package:car_renting/services/auth_service.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class EditProfile extends StatefulWidget {
   const EditProfile({super.key});
@@ -10,134 +13,187 @@ class EditProfile extends StatefulWidget {
 }
 
 class _EditProfileState extends State<EditProfile> {
+  late User _user;
+  late TextEditingController _nameController;
+  late TextEditingController _emailController;
+  bool _submitting = false;
+  bool _isInitialized = false;
+
+  final authService = AuthService();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      final args =
+          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+
+      if (args != null && args['user'] != null) {
+        _user = args['user'] as User;
+
+        _nameController = TextEditingController(text: _user.name);
+        _emailController = TextEditingController(text: _user.email);
+      } else {
+        _nameController = TextEditingController();
+        _emailController = TextEditingController();
+      }
+
+      _isInitialized = true;
+    }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _updateProfile() async {
+    final name = _nameController.text.trim();
+    final email = _emailController.text.trim();
+
+    if (name.isEmpty || email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Name and Email cannot be empty')),
+      );
+      return;
+    }
+
+    setState(() => _submitting = true);
+
+    try {
+      final token = await authService.getToken();
+      final url = Uri.parse(
+        'http://10.0.2.2:8000/api/users/update/${_user.id}',
+      );
+      final res = await http.put(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({'name': name, 'email': email}),
+      );
+
+      if (res.statusCode == 200) {
+        final decoded = jsonDecode(res.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile updated successfully!')),
+        );
+
+        // Update local user object
+        _user = User(
+          id: _user.id,
+          name: name,
+          email: email,
+          // copy other fields if any
+        );
+
+        // Return updated user to previous screen
+        Navigator.pop(context, _user);
+      } else {
+        final decoded = jsonDecode(res.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Update failed: ${decoded['message'] ?? res.body}'),
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+    } finally {
+      setState(() => _submitting = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final args =
-        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-    final user = args['user'] as User;
+    final mainColor = const Color(0xFF941B1D);
 
     return Scaffold(
-      appBar: MyAppBar(),
-      body: Center(
+      appBar: const MyAppBar(),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-              'assets/images/logo.png',
-              width: double.infinity,
-              height: 70,
-            ),
-            SizedBox(height: 45),
-            Text(
-              'UPDATE',
+            Image.asset('assets/images/logo.png', width: 150, height: 70),
+            const SizedBox(height: 30),
+            const Text(
+              'Update Your Profile',
               style: TextStyle(
                 fontFamily: 'Tajawal',
-                fontSize: 30,
-                letterSpacing: 5,
+                fontSize: 28,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF941B1D),
               ),
             ),
-            Text(
-              'Update your profile',
-              style: TextStyle(
-                fontFamily: 'Tajawal',
-                fontSize: 22,
-                fontWeight: FontWeight.w500,
-                color: Colors.black,
-              ),
-            ),
-            SizedBox(height: 5),
+            const SizedBox(height: 10),
             Form(
               child: Column(
                 children: [
+                  // Name
                   Padding(
-                    padding: const EdgeInsets.all(15.0),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
                     child: TextFormField(
-                      initialValue: user.name,
+                      controller: _nameController,
                       decoration: InputDecoration(
-                        label: Text('Name'),
-                        hintText: 'Enter you name',
-
-                        prefixIcon: Icon(Icons.person),
-
+                        labelText: 'Name',
+                        prefixIcon: const Icon(Icons.person),
                         filled: true,
                         fillColor: Colors.grey[100],
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                          borderSide: BorderSide(
-                            color: Color.fromARGB(255, 202, 202, 202),
-                            width: 1,
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide(
-                            color: Color.fromARGB(255, 177, 177, 177),
-                            width: 2,
-                          ),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-
-                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 20),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: TextFormField(
-                      initialValue: user.email,
-                      decoration: InputDecoration(
-                        label: Text('Email'),
-                        hintText: 'Enter you email',
-                        prefixIcon: Icon(Icons.email_outlined),
 
+                  // Email
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: TextFormField(
+                      controller: _emailController,
+                      decoration: InputDecoration(
+                        labelText: 'Email',
+                        prefixIcon: const Icon(Icons.email_outlined),
                         filled: true,
                         fillColor: Colors.grey[100],
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                          borderSide: BorderSide(
-                            color: Color.fromARGB(255, 202, 202, 202),
-                            width: 1,
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide(
-                            color: Color.fromARGB(255, 177, 177, 177),
-                            width: 2,
-                          ),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      style: TextStyle(fontFamily: 'Tajawal', fontSize: 20),
                     ),
                   ),
 
-                  ElevatedButton(
-                    onPressed: () {},
-                    style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all(
-                        Color(0xFF941B1D),
-                      ),
-                      padding: WidgetStateProperty.all(
-                        EdgeInsets.symmetric(vertical: 8, horizontal: 60),
-                      ),
-                      foregroundColor: WidgetStateProperty.all(Colors.white),
-                      shape: WidgetStateProperty.all(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            15,
-                          ), // <-- border radius
+                  const SizedBox(height: 25),
+
+                  // Submit Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: _submitting ? null : _updateProfile,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: mainColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                    ),
-                    child: Text(
-                      'Update',
-                      style: TextStyle(
-                        fontFamily: 'Tajawal',
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      child: _submitting
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text(
+                              'Update',
+                              style: TextStyle(
+                                fontFamily: 'Tajawal',
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
                     ),
                   ),
                 ],

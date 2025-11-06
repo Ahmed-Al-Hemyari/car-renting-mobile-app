@@ -30,17 +30,26 @@ class _CarsState extends State<Cars> {
   @override
   void initState() {
     super.initState();
-    _futureCars = _fetchCars();
 
-    // Handle navigation bar index
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final args = ModalRoute.of(context)?.settings.arguments as Map? ?? {};
-      final indexFromArgs = args['selectedIndex'] as int?;
-      if (indexFromArgs != null && indexFromArgs != _selectedIndex) {
-        setState(() {
+      final args =
+          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+
+      if (args != null) {
+        // Set navigation bar index if provided
+        final indexFromArgs = args['selectedIndex'] as int?;
+        if (indexFromArgs != null && indexFromArgs != _selectedIndex) {
           _selectedIndex = indexFromArgs;
-        });
+        }
+
+        // Set initial search query
+        _searchQuery = args['search'] ?? '';
       }
+
+      // Fetch cars with initial filters/search
+      setState(() {
+        _futureCars = _fetchCars();
+      });
     });
   }
 
@@ -151,6 +160,7 @@ class _CarsState extends State<Cars> {
                   label: const Text('Apply Filters'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF941B1D),
+                    foregroundColor: Colors.white,
                     minimumSize: const Size(double.infinity, 45),
                   ),
                 ),
