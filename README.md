@@ -4,6 +4,8 @@
 A modern, cross-platform car rental application built with **Flutter**. Car Renting offers a seamless user experience for browsing, filtering, renting, and reviewing cars.  
 Designed for individuals who want a fast and convenient way to rent cars on mobile devices.
 
+---
+
 ![App Screenshot](screenshots/home-page.png "Home Page Screenshot")
 
 ---
@@ -109,8 +111,3 @@ This mobile app connects to a custom **Laravel REST API backend** that handles:
 - LinkedIn: [https://www.linkedin.com/in/ahmed-alhemyari/](https://www.linkedin.com/in/ahmed-alhemyari/)  
 - Email: ahmed.a.alhemyari@gmail.com  
 - GitHub: [https://github.com/Ahmed-Al-Hemyari](https://github.com/Ahmed-Al-Hemyari)
-
-
-
-# Car-Renting-as-Mobile-app
-A modern mobile application built with flutter (dart), connected to Laravel elegant backend management with a dynamic, responsive frontend.
