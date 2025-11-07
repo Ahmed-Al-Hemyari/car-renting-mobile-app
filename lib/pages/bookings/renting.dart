@@ -173,7 +173,7 @@ class _RentingState extends State<Renting> {
                     final imageUrl = car.image;
                     final id = car.id;
 
-                    if (imageUrl == null || imageUrl.isEmpty) {
+                    if (imageUrl.isEmpty) {
                       return SvgPicture.asset(
                         'assets/images/no-image-car.svg',
                         key: ValueKey(id),
