@@ -14,32 +14,23 @@ class CarService {
     String? category,
     double? maxPrice,
     double? minRate,
+    int page = 1, // 👈 new page argument
   }) async {
     final token = await authService.getToken();
     if (token == null) {
-      throw Exception('User not logged in'); // prevent 401
+      throw Exception('User not logged in');
     }
 
-    // Build query parameters compatible with Laravel scope
     final queryParameters = <String, String>{};
 
-    if (search != null && search.isNotEmpty) {
-      queryParameters['search'] = search;
-    }
-    if (brand != null && brand.isNotEmpty) {
-      queryParameters['brand'] = brand;
-    }
-    if (category != null && category.isNotEmpty) {
+    if (search != null && search.isNotEmpty) queryParameters['search'] = search;
+    if (brand != null && brand.isNotEmpty) queryParameters['brand'] = brand;
+    if (category != null && category.isNotEmpty)
       queryParameters['category'] = category;
-    }
-    if (maxPrice != null) {
-      // Laravel expects "0-max" format
-      queryParameters['price'] = '0-${maxPrice.toInt()}';
-    }
-    if (minRate != null) {
-      // Laravel expects "x+" format
-      queryParameters['rate'] = '${minRate.toString()}+';
-    }
+    if (maxPrice != null) queryParameters['price'] = '0-${maxPrice.toInt()}';
+    if (minRate != null) queryParameters['rate'] = '${minRate.toString()}+';
+
+    queryParameters['page'] = page.toString(); // 👈 add page number
 
     final uri = Uri.parse(url).replace(queryParameters: queryParameters);
 
@@ -57,8 +48,13 @@ class CarService {
 
     if (res.statusCode == 200) {
       final decoded = jsonDecode(res.body);
-      // Laravel wraps data under 'data' key
+
       final carsList = decoded['data'] ?? [];
+      final meta = decoded['meta'];
+
+      // optional: print pagination info
+      print('Page ${meta['current_page']} of ${meta['last_page']}');
+
       return (carsList as List).map((json) => Car.fromJson(json)).toList();
     } else {
       throw Exception('Failed to load cars: ${res.body}');

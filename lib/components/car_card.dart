@@ -26,7 +26,7 @@ class CarCard extends StatelessWidget {
                 final id = car.id;
 
                 // If no image, show placeholder
-                if (imageUrl == null || imageUrl.isEmpty) {
+                if (imageUrl.isEmpty) {
                   return SvgPicture.asset(
                     'assets/images/no-image-car.svg',
                     key: ValueKey(id),

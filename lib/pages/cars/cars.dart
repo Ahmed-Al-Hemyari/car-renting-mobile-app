@@ -25,7 +25,12 @@ class _CarsState extends State<Cars> {
   double? _maxPrice;
   double? _minRate;
 
-  late Future<List<Car>> _futureCars;
+  int _currentPage = 1;
+  bool _isLoading = false;
+  bool _hasMore = true;
+  final List<Car> _cars = [];
+
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -36,32 +41,65 @@ class _CarsState extends State<Cars> {
           ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
 
       if (args != null) {
-        // Set navigation bar index if provided
-        final indexFromArgs = args['selectedIndex'] as int?;
-        if (indexFromArgs != null && indexFromArgs != _selectedIndex) {
-          _selectedIndex = indexFromArgs;
-        }
-
-        // Set initial search query
+        _selectedIndex = args['selectedIndex'] ?? _selectedIndex;
         _searchQuery = args['search'] ?? '';
       }
 
-      // Fetch cars with initial filters/search
-      setState(() {
-        _futureCars = _fetchCars();
-      });
+      _fetchCars(reset: true);
+    });
+
+    // 👇 Infinite scroll listener
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+              _scrollController.position.maxScrollExtent - 300 &&
+          !_isLoading &&
+          _hasMore) {
+        _fetchCars();
+      }
     });
   }
 
-  Future<List<Car>> _fetchCars() async {
-    return carService.CarIndex(
-      url,
-      search: _searchQuery,
-      brand: _selectedBrand,
-      category: _selectedCategory,
-      maxPrice: _maxPrice,
-      minRate: _minRate,
-    );
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _fetchCars({bool reset = false}) async {
+    if (_isLoading) return;
+
+    setState(() => _isLoading = true);
+
+    if (reset) {
+      _currentPage = 1;
+      _cars.clear();
+      _hasMore = true;
+    }
+
+    try {
+      final newCars = await carService.CarIndex(
+        url,
+        search: _searchQuery,
+        brand: _selectedBrand,
+        category: _selectedCategory,
+        maxPrice: _maxPrice,
+        minRate: _minRate,
+        page: _currentPage,
+      );
+
+      setState(() {
+        if (newCars.isEmpty) {
+          _hasMore = false;
+        } else {
+          _cars.addAll(newCars);
+          _currentPage++;
+        }
+      });
+    } catch (e) {
+      debugPrint('Error fetching cars: $e');
+    }
+
+    setState(() => _isLoading = false);
   }
 
   void _onItemTapped(int index) {
@@ -127,13 +165,12 @@ class _CarsState extends State<Cars> {
                     prefixIcon: Icon(Icons.attach_money),
                   ),
                   keyboardType: TextInputType.number,
-                  onChanged: (val) => setModalState(
-                    () => _maxPrice = double.tryParse(val) ?? _maxPrice,
-                  ),
+                  onChanged: (val) =>
+                      setModalState(() => _maxPrice = double.tryParse(val)),
                 ),
                 const SizedBox(height: 10),
 
-                // Minimum Rating
+                // Min Rating
                 TextFormField(
                   decoration: const InputDecoration(
                     labelText: 'Min Rating',
@@ -141,20 +178,16 @@ class _CarsState extends State<Cars> {
                     prefixIcon: Icon(Icons.star),
                   ),
                   keyboardType: TextInputType.number,
-                  onChanged: (val) => setModalState(
-                    () => _minRate = double.tryParse(val) ?? _minRate,
-                  ),
+                  onChanged: (val) =>
+                      setModalState(() => _minRate = double.tryParse(val)),
                 ),
-
                 const SizedBox(height: 20),
 
-                // Apply Filters
+                // Apply
                 ElevatedButton.icon(
                   onPressed: () {
                     Navigator.pop(context);
-                    setState(() {
-                      _futureCars = _fetchCars();
-                    });
+                    _fetchCars(reset: true);
                   },
                   icon: const Icon(Icons.filter_alt),
                   label: const Text('Apply Filters'),
@@ -174,6 +207,9 @@ class _CarsState extends State<Cars> {
 
   @override
   Widget build(BuildContext context) {
+    final cols = 2;
+    final rows = (_cars.length / cols).ceil();
+
     return Scaffold(
       appBar: MyAppBar(
         title: "Our Cars",
@@ -191,10 +227,8 @@ class _CarsState extends State<Cars> {
             padding: const EdgeInsets.all(10),
             child: TextField(
               onChanged: (val) {
-                setState(() {
-                  _searchQuery = val;
-                  _futureCars = _fetchCars();
-                });
+                _searchQuery = val;
+                _fetchCars(reset: true);
               },
               decoration: InputDecoration(
                 hintText: 'Search by brand or model...',
@@ -207,37 +241,35 @@ class _CarsState extends State<Cars> {
           ),
 
           Expanded(
-            child: FutureBuilder<List<Car>>(
-              future: _futureCars,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState != ConnectionState.done) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  return const Center(child: Text('Failed to load cars'));
-                }
-
-                final cars = snapshot.data ?? [];
-                if (cars.isEmpty) {
-                  return const Center(child: Text('No cars found.'));
-                }
-
-                final cols = 2;
-                final rows = (cars.length / cols).ceil();
-                return Container(
-                  color: Colors.grey[50],
-                  padding: const EdgeInsets.all(8),
-                  child: SingleChildScrollView(
-                    child: LayoutGrid(
-                      columnSizes: List.filled(cols, 1.fr),
-                      rowSizes: List.filled(rows, auto),
-                      rowGap: 8,
-                      columnGap: 8,
-                      children: [for (final car in cars) CarCard(car: car)],
+            child: RefreshIndicator(
+              onRefresh: () => _fetchCars(reset: true),
+              child: _cars.isEmpty && !_isLoading
+                  ? const Center(child: Text('No cars found.'))
+                  : SingleChildScrollView(
+                      controller: _scrollController,
+                      child: Column(
+                        children: [
+                          Container(
+                            color: Colors.grey[50],
+                            padding: const EdgeInsets.all(8),
+                            child: LayoutGrid(
+                              columnSizes: List.filled(cols, 1.fr),
+                              rowSizes: List.filled(rows, auto),
+                              rowGap: 8,
+                              columnGap: 8,
+                              children: [
+                                for (final car in _cars) CarCard(car: car),
+                              ],
+                            ),
+                          ),
+                          if (_isLoading)
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 20),
+                              child: CircularProgressIndicator(),
+                            ),
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              },
             ),
           ),
         ],

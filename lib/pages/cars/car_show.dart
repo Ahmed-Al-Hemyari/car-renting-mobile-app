@@ -2,6 +2,7 @@ import 'package:car_renting/components/car_unavailable_calendar.dart';
 import 'package:car_renting/components/my_app_bar.dart';
 import 'package:car_renting/components/my_navigation_bar.dart';
 import 'package:car_renting/classes/car_class.dart';
+import 'package:car_renting/components/review_card.dart';
 import 'package:car_renting/utils/navigation_helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -46,6 +47,7 @@ class _CarShowState extends State<CarShow> {
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ??
         {};
     final car = args['car'] as Car?;
+    print('Car: ${car?.name}, Rates: ${car?.rates}');
 
     if (car == null) {
       return Scaffold(body: Center(child: Text('Car not found!!')));
@@ -65,7 +67,7 @@ class _CarShowState extends State<CarShow> {
                     final imageUrl = car.image;
                     final id = car.id;
 
-                    if (imageUrl == null || imageUrl.isEmpty) {
+                    if (imageUrl.isEmpty) {
                       return SvgPicture.asset(
                         'assets/images/no-image-car.svg',
                         key: ValueKey(id),
@@ -175,6 +177,26 @@ class _CarShowState extends State<CarShow> {
                     ),
                   ),
                   child: const Text('Rent'),
+                ),
+              ),
+              SizedBox(height: 20),
+              Divider(thickness: 2),
+              SizedBox(height: 20),
+              Text(
+                'Reviews',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Container(
+                color: Colors.grey[50],
+                padding: const EdgeInsets.all(8),
+                child: Column(
+                  children: [
+                    for (final rate in car.rates) ReviewCard(rate: rate),
+                  ],
                 ),
               ),
             ],

@@ -7,6 +7,7 @@ import 'package:car_renting/services/auth_service.dart';
 import 'package:car_renting/services/booking_service.dart';
 import 'package:car_renting/utils/navigation_helpers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -79,6 +80,52 @@ class _ProfileState extends State<Profile> {
     );
   }
 
+  // Widget _buildUserImage(user) {
+  //   final id = user.id;
+
+  //   final image = user.image;
+
+  //   if (image == null || image.isEmpty) {
+  //     return SvgPicture.asset(
+  //       'assets/images/no-image-user.svg',
+  //       key: ValueKey(id),
+  //       width: 60,
+  //       height: 60,
+  //       fit: BoxFit.cover,
+  //     );
+  //   }
+
+  //   if (image.toLowerCase().endsWith('.svg')) {
+  //     return SvgPicture.network(
+  //       image,
+  //       key: ValueKey(id),
+  //       width: 60,
+  //       height: 60,
+  //       fit: BoxFit.cover,
+  //       placeholderBuilder: (context) =>
+  //           const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+  //     );
+  //   }
+
+  //   return Image.network(
+  //     image,
+  //     key: ValueKey(id),
+  //     width: 60,
+  //     height: 60,
+  //     fit: BoxFit.cover,
+  //     loadingBuilder: (context, child, progress) => progress == null
+  //         ? child
+  //         : const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+  //     errorBuilder: (context, error, stackTrace) => SvgPicture.asset(
+  //       'assets/images/no-image-user.svg',
+  //       key: ValueKey(id),
+  //       width: 60,
+  //       height: 60,
+  //       fit: BoxFit.cover,
+  //     ),
+  //   );
+  // }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -104,11 +151,60 @@ class _ProfileState extends State<Profile> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const CircleAvatar(
-                      backgroundImage: AssetImage(
-                        'assets/images/no-image-user.jpg',
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(15),
+                      child: Builder(
+                        builder: (context) {
+                          final imageUrl = user.image;
+                          final id = user.id;
+
+                          if (imageUrl!.isEmpty) {
+                            return SvgPicture.asset(
+                              'assets/images/no-image-user.svg',
+                              key: ValueKey(id),
+                              width: 80,
+                              height: 80,
+                              fit: BoxFit.cover,
+                            );
+                          }
+
+                          if (imageUrl.toLowerCase().endsWith('.svg')) {
+                            return SvgPicture.network(
+                              imageUrl,
+                              key: ValueKey(id),
+                              width: 80,
+                              height: 80,
+                              fit: BoxFit.cover,
+                              placeholderBuilder: (context) => const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+                          }
+
+                          return Image.network(
+                            imageUrl,
+                            key: ValueKey(id),
+                            width: 80,
+                            height: 80,
+                            fit: BoxFit.cover,
+                            loadingBuilder: (context, child, progress) {
+                              if (progress == null) return child;
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            },
+                            errorBuilder: (context, error, stackTrace) {
+                              return SvgPicture.asset(
+                                'assets/images/no-image-car.svg',
+                                key: ValueKey(id),
+                                width: 80,
+                                height: 80,
+                                fit: BoxFit.cover,
+                              );
+                            },
+                          );
+                        },
                       ),
-                      radius: 40.0,
                     ),
                     const SizedBox(height: 8),
                     Row(

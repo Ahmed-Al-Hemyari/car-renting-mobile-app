@@ -78,7 +78,7 @@ class _EditProfileState extends State<EditProfile> {
       );
 
       if (res.statusCode == 200) {
-        final decoded = jsonDecode(res.body);
+        // final decoded = jsonDecode(res.body);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Profile updated successfully!')),
         );
