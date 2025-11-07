@@ -243,31 +243,32 @@ class _CarsState extends State<Cars> {
           Expanded(
             child: RefreshIndicator(
               onRefresh: () => _fetchCars(reset: true),
-              child: _cars.isEmpty && !_isLoading
-                  ? const Center(child: Text('No cars found.'))
+              child: _cars.isEmpty
+                  ? Center(
+                      child: _isLoading
+                          ? const CircularProgressIndicator()
+                          : const Text('No cars found.'),
+                    )
                   : SingleChildScrollView(
                       controller: _scrollController,
-                      child: Column(
-                        children: [
-                          Container(
-                            color: Colors.grey[50],
-                            padding: const EdgeInsets.all(8),
-                            child: LayoutGrid(
-                              columnSizes: List.filled(cols, 1.fr),
-                              rowSizes: List.filled(rows, auto),
-                              rowGap: 8,
-                              columnGap: 8,
-                              children: [
-                                for (final car in _cars) CarCard(car: car),
-                              ],
-                            ),
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: LayoutGrid(
+                          columnSizes: List.filled(cols, 1.fr),
+                          rowSizes: List.filled(
+                            (_cars.length / cols)
+                                .ceil()
+                                .clamp(1, double.infinity)
+                                .toInt(),
+                            auto,
                           ),
-                          if (_isLoading)
-                            const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 20),
-                              child: CircularProgressIndicator(),
-                            ),
-                        ],
+                          rowGap: 8,
+                          columnGap: 8,
+                          children: [
+                            for (final car in _cars) CarCard(car: car),
+                          ],
+                        ),
                       ),
                     ),
             ),

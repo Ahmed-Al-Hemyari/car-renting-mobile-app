@@ -1,3 +1,4 @@
+import 'package:car_renting/pages/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:car_renting/components/my_app_bar.dart';
 import 'package:car_renting/classes/user_class.dart';
@@ -83,16 +84,22 @@ class _EditProfileState extends State<EditProfile> {
           const SnackBar(content: Text('Profile updated successfully!')),
         );
 
-        // Update local user object
-        _user = User(
-          id: _user.id,
-          name: name,
-          email: email,
-          // copy other fields if any
-        );
+        // Update secure storage
+        String? userJson = await storage.read(key: 'user');
+        Map<String, dynamic> userMap = {};
+        if (userJson != null) {
+          userMap = jsonDecode(userJson);
+        }
+        userMap['name'] = name;
+        userMap['email'] = email;
+        await storage.write(key: 'user', value: jsonEncode(userMap));
 
         // Return updated user to previous screen
-        Navigator.pop(context, _user);
+        Navigator.pushReplacementNamed(
+          context,
+          '/profile',
+          arguments: {'selectedIndex': 2, 'user': authService.getUser()},
+        );
       } else {
         final decoded = jsonDecode(res.body);
         ScaffoldMessenger.of(context).showSnackBar(
