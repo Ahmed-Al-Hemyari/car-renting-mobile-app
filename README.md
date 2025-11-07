@@ -62,8 +62,8 @@ Designed for individuals who want a fast and convenient way to rent cars on mobi
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/Ahmed-Al-Hemyari/Car-Renting-as-Mobile-app.git
-   cd driverent-flutter-app
+   git clone https://github.com/Ahmed-Al-Hemyari/car-renting-mobile-app
+   cd car-renting-mobile-app
    ```
 
 2. **Install dependencies**
